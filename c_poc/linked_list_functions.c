@@ -6,9 +6,9 @@
  * @head: head of the linked list
  * Return: newly created node
  */
-node_t *add_node(const char *str, node_t **head)
+node_t *add_node(char *str, node_t **head)
 {
-	node_t *new_node, *temp;
+	node_t *new_node;
 
 	if (!str)
 		return(NULL);
@@ -22,6 +22,7 @@ node_t *add_node(const char *str, node_t **head)
 	return(new_node);
 }
 
+
 /*
  * free_list - Frees a linked list
  * @head: head of the linked list
@@ -34,6 +35,8 @@ void free_list(node_t **head)
 	{
 		temp = *head;
 		*head = (*head)->next;
+		free(temp->filepath);
+		temp->filepath = NULL;
 		free(temp);
 		temp = NULL;
 	}
@@ -50,3 +53,21 @@ void print_list(node_t *head){
 		head = head->next;
 	}
 }
+
+/*
+ * TESTS
+int main(void)
+{
+	node_t *todel = NULL;
+	node_t *head = NULL;
+
+	add_node("hello", &head);
+	add_node("goodbye", &head);
+	add_node("lala", &head);
+	add_node("haha", &head);
+	print_list(head);
+	printf("------------------------\n");
+	free_list(&head);
+	return(0);
+}
+*/
