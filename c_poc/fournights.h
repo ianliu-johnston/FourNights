@@ -39,9 +39,8 @@ void *my_memset(void *s, char c, size_t n);
 void *my_calloc(size_t nmemb, size_t size);
 void *recalloc(void *ptr, size_t old_size, size_t new_size);
 
-
 /* OS functions */
-node_t *recurse_ls(char *filepath, node_t **head);
+node_t *recurse_ls(char *filepath, node_t **head, node_t *file_exts);
 node_t *build_ext_list(const char *filepath, node_t **head, node_t *(*fxn)(char *, node_t **));
 int write_to_file(const char *filepath);
 
