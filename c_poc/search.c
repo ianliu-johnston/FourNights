@@ -1,35 +1,41 @@
 #include "fournights.h"
-
-/*
- * binary_search - search for a value with binary search algorithm
- * @array: array to search through
+/**
+ * helper - recursive helper function for the binary search
+ * @array: input array
  * @size: size of the array
- * @search: value to search for
- * Return: index in array, -1 on error
+ * @first: first value of the sub array
+ * @last: last value of the sub array
+ * @value: value to search for
+ * Return: Index of value if found, -1 on if not found
  */
-int binary_search(int array[], int size, int search)
+int helper(int *array, size_t size, size_t first, size_t last, int value)
 {
-	int i;
+	if (value == array[first])
+		return (first);
+	if (value == array[last])
+		return (last);
+	if (first >= last)
+		return (-1);
+	if (value == array[(first + last) / 2])
+		return ((first + last) / 2);
 
-	if (!array)
-		return(-1);
-
-	for(i = 0; i <= size; i++)
-	{
-		printf("arr[%d] = %d, size = %d\n", i, array[i], size);
-		if(array[i] <= array[size])
-			i = size / 2;
-		else
-			size = size / 2;
-		if (array[i] == search)
-			return(i);
-	}
-	return(0);
+	if (value < array[(first + last) / 2])
+		return (helper(array, size, first, ((first + last) / 2), value));
+	if (value > array[(first + last) / 2])
+		return (helper(array, size, (first + last) / 2 + 1, last, value));
+	return (-1);
 }
 
-int main(void)
+/**
+  * binary_search - binary search algorithm
+  * @array: input array - must sorted in ascending order
+  * @size: size of the array
+  * @value: value to search for
+  * Return: Index of value if found, -1 on errors or not found
+ **/
+int binary_search(int *array, size_t size, int value)
 {
-	int array[10] = {1, 2, 4, 12, 22, 23, 39, 120, 245, 2324};
-	printf("%d\n", binary_search(array, 10, 245));
-	return(0);
+	if (!array)
+		return (-1);
+	return (helper(array, size, 0, size - 1, value));
 }

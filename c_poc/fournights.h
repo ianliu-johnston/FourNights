@@ -31,23 +31,23 @@ node_t *add_node(char *str, node_t **head);
 /* String Functions */
 int my_strncmp(const char *s1, const char *s2, size_t n);
 size_t my_strlen(const char *s);
-char *my_strncat(char *dest, const char *src, size_t n);
+char *my_strncat(char *dest, const char *src, size_t offset, size_t n);
 unsigned int find_substr_end(char *string, char *substr);
 
 /* Memory Management */
-void *my_memset(void *s, int c, size_t n);
+void *my_memset(void *s, char c, size_t n);
 void *my_calloc(size_t nmemb, size_t size);
+void *recalloc(void *ptr, size_t old_size, size_t new_size);
 
 
 /* OS functions */
 node_t *recurse_ls(char *filepath, node_t **head);
-int read_from_file(const char *filepath, void (*fxn)(char *));
+node_t *build_ext_list(const char *filepath, node_t **head, node_t *(*fxn)(char *, node_t **));
 int write_to_file(const char *filepath);
 
 /* TODO if enough time */
 /* Recreate: */
 void *my_malloc(size_t size);
-void *my_realloc(void *ptr, size_t size);
 void my_free(void *ptr);
 
 struct dirent *my_readdir(DIR *dirp);
