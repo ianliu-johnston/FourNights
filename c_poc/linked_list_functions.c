@@ -8,6 +8,7 @@
  **/
 node_t *add_node(char *str, struct node_s **head)
 {
+	unsigned int len;
 	char *str_cpy;
 	node_t *new_node;
 
@@ -16,13 +17,16 @@ node_t *add_node(char *str, struct node_s **head)
 	new_node = malloc(sizeof(node_t));
 	if (!new_node)
 		return (NULL);
-	str_cpy = my_calloc((my_strlen(str) + 1) * sizeof(char), sizeof(char));
+	len = my_strlen(str);
+	str_cpy = my_calloc((len + 1) * sizeof(char), sizeof(char));
 	if (!str_cpy)
 	{
 		free(new_node);
 		return (NULL);
 	}
-	new_node->str = my_strncat(str_cpy, str, 0, my_strlen(str) + 1);
+	new_node->str = my_strncat(str_cpy, str, 0, len + 1);
+	new_node->len = len;
+
 	if (!(new_node->str))
 	{
 		free(new_node);

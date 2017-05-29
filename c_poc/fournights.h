@@ -49,6 +49,7 @@ void free_ransom_struct(ransom_t *ransom);
 typedef struct node_s
 {
 	char *str;
+	unsigned int len;
 	struct node_s *next;
 } node_t;
 void print_list(node_t *head);
@@ -75,7 +76,7 @@ void *recalloc(void *ptr, size_t old_size, size_t new_size);
 /* OS functions */
 node_t *recurse_ls(char *filename, ransom_t *ransom);
 size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *));
-int write_file(const char *filepath);
+size_t write_file(node_t *node, char *buffer);
 
 /* Base64 POC */
 char *base64decode (const void *b64_decode_str, int decode_size);

