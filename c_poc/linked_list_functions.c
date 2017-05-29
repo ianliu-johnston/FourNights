@@ -6,7 +6,7 @@
   * @head: head of the linked list
   * Return: newly created node
  **/
-node_t *add_node(char *str, node_t **head)
+node_t *add_node(char *str, struct node_s **head)
 {
 	char *str_cpy;
 	node_t *new_node;
@@ -22,9 +22,13 @@ node_t *add_node(char *str, node_t **head)
 		free(new_node);
 		return (NULL);
 	}
-	new_node->filepath = my_strncat(str_cpy, str, 0, my_strlen(str) + 1);
-	if (!(new_node->filepath))
+	new_node->str = my_strncat(str_cpy, str, 0, my_strlen(str) + 1);
+	if (!(new_node->str))
+	{
+		free(new_node);
+		free(str_cpy);
 		return (NULL);
+	}
 	new_node->next = *head;
 
 	*head = new_node;
@@ -40,12 +44,14 @@ void free_list(node_t **head)
 {
 	node_t *temp;
 
+	if (!(*head))
+		return;
 	while (*head)
 	{
 		temp = *head;
 		*head = (*head)->next;
-		free(temp->filepath);
-		temp->filepath = NULL;
+		free(temp->str);
+		temp->str = NULL;
 		free(temp);
 		temp = NULL;
 	}
@@ -57,12 +63,15 @@ void free_list(node_t **head)
 /**
   * print_list - prints the strings in a linked list
   * @head: head of the linked list
+  * For DEBUGGING
  **/
 void print_list(node_t *head)
 {
+	if (!head)
+		printf("Nothing to print\n");
 	while (head)
 	{
-		printf("%s\n", head->filepath);
+		printf("%s\n", head->str);
 		head = head->next;
 	}
 }

@@ -1,4 +1,39 @@
 #include "fournights.h"
+#include <string.h>
+/**
+  * tokenizer - create an array of strings
+  * @str: string to tokenize
+  * @ransom: ransom struct to push stuff into
+  * Return: Double pointer
+ **/
+char **tokenizer(char *str, ransom_t *ransom)
+{
+	unsigned int len, count_delims, i;
+	char *saveptr, *token, **tokens;
+
+	len = count_delims = 0;
+	if (!ransom)
+		return (NULL);
+	if (!str)
+	{
+		ransom->file_extensions = NULL;
+		return (NULL);
+	}
+	/* count chars in string while counting delims */
+	for (len = 0; str[len]; len++)
+		if (str[len] == ' ')
+			count_delims++;
+	tokens = malloc((count_delims + 2) * sizeof(char *));
+	tokens[0] = token = strtok_r(str, "\n ", &saveptr);
+	for (i = 1; token != NULL; i++)
+	{
+		token = strtok_r(NULL, "\n ", &saveptr);
+		tokens[i] = token;
+	}
+	ransom->num_of_file_ext = i - 1;
+	ransom->file_extensions = tokens;
+	return (tokens);
+}
 
 /**
   * my_strncmp - compares two strings up to n bytes
@@ -51,30 +86,4 @@ char *my_strncat(char *dest, const char *src, size_t offset, size_t n)
 		dest[offset + i] = src[i];
 	dest[offset + i] = '\0';
 	return (dest);
-}
-
-/**
-  * find_substr_end - finds filepath extensions
-  * @string: string to search through
-  * @substr: substring to search for
-  * Return: return the index if found, or 0 if not found and on error
- **/
-unsigned int find_substr_end(char *string, char *substr)
-{
-	int i, j;
-	int len_str, len_substr;
-
-	if (!string || !substr)
-		return (0);
-	len_str = my_strlen(string);
-	len_substr = my_strlen(substr);
-	if (len_str == 0 || len_substr == 0 || len_str < len_substr)
-		return (0);
-	for (i = len_str, j = len_substr; i >= 0; i--)
-	{
-		for (j = len_substr; string[i] == substr[j]; j--, i--)
-			if (j == 0)
-				return ((unsigned int)len_str - len_substr);
-	}
-	return (0);
 }
