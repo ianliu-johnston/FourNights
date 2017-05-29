@@ -6,3 +6,9 @@ No dependencies required. All precompiled libraries are included here. Few stand
 ## Versions:
 1. Proof of concept: All functions and variables are named logically
 2. Anti-Disassemble: All functions and variables are obfuscated
+
+## Build:
+``supergcc *.c -lssl -lcrypto``
+
+## Author:
+**Ian Xaun Liu-Johnston**
