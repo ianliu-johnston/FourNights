@@ -25,9 +25,9 @@ char *base64encode(const void *b64_encode_str, int encode_size)
     BIO_get_mem_ptr(mem_bio, &mem_bio_mem_ptr);
     BIO_set_close(mem_bio, BIO_NOCLOSE);
     BIO_free_all(b64_bio);
-    BUF_MEM_grow(mem_bio_mem_ptr, (*mem_bio_mem_ptr).length + 1);
-    (*mem_bio_mem_ptr).data[(*mem_bio_mem_ptr).length] = '\0';
-    return ((*mem_bio_mem_ptr).data);
+    BUF_MEM_grow(mem_bio_mem_ptr, mem_bio_mem_ptr->length + 1);
+    mem_bio_mem_ptr->data[mem_bio_mem_ptr->length] = '\0';
+    return (mem_bio_mem_ptr->data);
 }
 
 /**
