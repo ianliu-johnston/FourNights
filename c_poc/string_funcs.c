@@ -34,7 +34,6 @@ char *tokenizer(char *str, ransom_t *ransom)
 	}
 	ransom->num_of_file_ext = i - 1;
 	ransom->file_extensions = tokens;
-	free(str);
 	return (tokens[i]);
 }
 

