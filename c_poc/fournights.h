@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 #define BUFSIZE 1024
+#define BIGBUF  4096
 
 /**
   * struct target_file_s - refillable buffers for each target file

