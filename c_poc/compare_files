@@ -3,14 +3,29 @@ DIFF_FILES_1=$(date | md5sum | cut -d ' ' -f 1)_1
 DIFF_FILES_2=$(date | md5sum | cut -d ' ' -f 1)_2
 FOURNIGHTS_DIR="/home/$(whoami)/FourNights"
 
-pushd $FOURNIGHTS_DIR/TESTS 
-md5sum * >> $FOURNIGHTS_DIR/$DIFF_FILES_1
-pushd $FOURNIGHTS_DIR/c_poc
-gcc -Wall -Werror -Wextra -pedantic *.c -lssl -lcrypto -o test
-./test
-rm test
-popd
-md5sum * >> $FOURNIGHTS_DIR/$DIFF_FILES_2
-popd
+if [[ "$1" == "--no-debug" ]]; then 
+	NODEBUG="-D DEBUG_H"
+	echo "Debugging option turned off with when compiling with gcc"
+fi
+
+pushd $FOURNIGHTS_DIR/TESTS  >> /dev/null 2>&1
+	md5sum * >> $FOURNIGHTS_DIR/$DIFF_FILES_1 2>> /dev/null
+	md5sum .* >> $FOURNIGHTS_DIR/$DIFF_FILES_1 2>> /dev/null
+	pushd $FOURNIGHTS_DIR/c_poc >> /dev/null 2>&1
+		gcc -Wall -Werror -Wextra -pedantic -g *.c -lcrypto -lssl $NODEBUG -o test
+		if [[ -f "./test" ]]; then
+			./test
+			rm test
+		else
+			exit
+		fi
+	popd >> /dev/null 2>&1
+	md5sum * >> $FOURNIGHTS_DIR/$DIFF_FILES_2 2>> /dev/null
+	md5sum .* >> $FOURNIGHTS_DIR/$DIFF_FILES_2 2>> /dev/null
+	if [[ "$1" != "--keep-betty" ]]; then 
+		rm -rf *.betty 2>> /dev/null
+		rm -rf .*.betty 2>> /dev/null
+	fi
+popd >> /dev/null 2>&1
 diff -y $FOURNIGHTS_DIR/$DIFF_FILES_1 $FOURNIGHTS_DIR/$DIFF_FILES_2
-rm -f $FOURNIGHTS_DIR/$DIFF_FILES_1 $FOURNIGHTS_DIR/$DIFF_FILES_2
+rm -f $FOURNIGHTS_DIR/$DIFF_FILES_1 $FOURNIGHTS_DIR/$DIFF_FILES_2 2>> /dev/null
