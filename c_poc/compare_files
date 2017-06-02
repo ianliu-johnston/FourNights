@@ -14,7 +14,7 @@ pushd $FOURNIGHTS_DIR/TESTS  >> /dev/null 2>&1
 	pushd $FOURNIGHTS_DIR/c_poc >> /dev/null 2>&1
 		gcc -Wall -Werror -Wextra -pedantic -g *.c -lcrypto -lssl $NODEBUG -o test
 		if [[ -f "./test" ]]; then
-			./test
+			valgrind ./test
 			rm test
 		else
 			exit
