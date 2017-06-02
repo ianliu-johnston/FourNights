@@ -12,7 +12,9 @@ void debug_list(target_file_t *target_file_buf)
 	printf("bytes_read: %d\n", (int)target_file_buf->bytes_read);
 	printf("file_offset: %d\n", (int)target_file_buf->file_offset);
 	printf("st_size: %d\n", (int)target_file_buf->file_info.st_size);
+	/*
 	target_file_buf->buf[400] = '\0';
+	*/
 	printf("%s...(truncated)...", target_file_buf->buf);
 	getchar();
 }

