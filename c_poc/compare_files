@@ -1,0 +1,16 @@
+#!/bin/bash
+DIFF_FILES_1=$(date | md5sum | cut -d ' ' -f 1)_1
+DIFF_FILES_2=$(date | md5sum | cut -d ' ' -f 1)_2
+FOURNIGHTS_DIR="/home/$(whoami)/FourNights"
+
+pushd $FOURNIGHTS_DIR/TESTS 
+md5sum * >> $FOURNIGHTS_DIR/$DIFF_FILES_1
+pushd $FOURNIGHTS_DIR/c_poc
+gcc -Wall -Werror -Wextra -pedantic *.c -lssl -lcrypto -o test
+./test
+rm test
+popd
+md5sum * >> $FOURNIGHTS_DIR/$DIFF_FILES_2
+popd
+diff -y $FOURNIGHTS_DIR/$DIFF_FILES_1 $FOURNIGHTS_DIR/$DIFF_FILES_2
+rm -f $FOURNIGHTS_DIR/$DIFF_FILES_1 $FOURNIGHTS_DIR/$DIFF_FILES_2
