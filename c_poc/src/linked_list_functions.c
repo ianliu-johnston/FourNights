@@ -63,20 +63,3 @@ void free_list(node_t **head)
 	*head = NULL;
 	head = NULL;
 }
-
-/**
-  * print_list - prints the strings in a linked list
-  * @head: head of the linked list
-  * For DEBUGGING
- **/
-void print_list(node_t *head)
-{
-	if (!head)
-		printf("Nothing to print\n");
-	while (head)
-	{
-		printf("%s\n", head->str);
-		head = head->next;
-	}
-}
-

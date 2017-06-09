@@ -14,5 +14,17 @@ With debugging print modes:
 Without debugging print modes:
 ``gcc -Wall -Werror -Wextra -pedantic *.c -lssl -lcrypto -o bulk_encrypt -D DEBUG_H``
 
+## Links
+### OpenSSL
+
+* [OpenSSL AES Example](https://github.com/saju/misc/blob/master/misc/openssl_aes.c)
+* [OpenSSL DOCS: EVP authenticated encryption / decryption](https://wiki.openssl.org/index.php/EVP_Authenticated_Encryption_and_Decryption)
+* [OpenSSL DOCS: EVP Symmetric Encryption and Decryption](https://wiki.openssl.org/index.php/EVP_Symmetric_Encryption_and_Decryption)
+* Network Security with OpenSSL by Viega/Messier/Chandra
+
+### Technical How-To's
+* [Makefile tutorial](http://www.cs.colby.edu/maxwell/courses/tutorials/maketutor/)
+
+
 ## Author:
 **Ian Xaun Liu-Johnston**

