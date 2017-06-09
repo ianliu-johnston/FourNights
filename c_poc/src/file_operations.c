@@ -30,7 +30,7 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
 	}
 	fd = fopen(filepath, "rb");
 	fseek(fd, file_offset, SEEK_SET);
-#ifndef DEBUG_H
+#ifndef NO_DEBUG
 	printf("\n\n----------------------------------------------\n");
 	printf("st_size: %d - file_offset: %d == %d\n", (int)file_info.st_size, (int)ransom->target_file_buf->file_offset, (int)file_info.st_size - (int)ransom->target_file_buf->file_offset);
 	printf("bytes_read: %d\n", (int)bytes_read);
