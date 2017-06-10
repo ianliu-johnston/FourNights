@@ -9,10 +9,10 @@ No dependencies required. All precompiled libraries are included here. Few stand
 
 ## Build:
 With debugging print modes:
-``gcc -Wall -Werror -Wextra -pedantic *.c -lssl -lcrypto -o bulk_encrypt``
+``make DEBUG=1``
 
 Without debugging print modes:
-``gcc -Wall -Werror -Wextra -pedantic *.c -lssl -lcrypto -o bulk_encrypt -D DEBUG_H``
+``make``
 
 ## Links
 ### OpenSSL

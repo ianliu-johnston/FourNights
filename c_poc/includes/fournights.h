@@ -109,7 +109,8 @@ ssize_t my_getline(char **lineptr, size_t *n, FILE *stream);
 
 /* DEBUGGING */
 #ifndef NO_DEBUG
-void debug_list(target_file_t *target_file_buf);
-void print_for_debug(struct ransom_s ransom);
+	void debug_list(target_file_t *target_file_buf);
+	void print_for_debug(struct ransom_s ransom);
 #endif
+
 #endif
