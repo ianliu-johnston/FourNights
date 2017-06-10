@@ -35,13 +35,15 @@ all: $(SRC) $(NAME)
 $(NAME): $(OBJ)
 	$(CC) $(OBJ) -o $@
 
+# TODO: fix to have a simple command: make debug, instead of make DEBUG=1
 #debug: SRC += $(SRC_DIR)/debugging_fxns.c
+#debug: 
 #debug: all
 
 fclean: oclean clean
 
 oclean:
-	$(RM) $(OBJ)
+	$(RM) $(SRC_DIR)/debugging_fxns.o $(OBJ)
 
 clean:
 	$(RM) .*.swp $(NAME)
