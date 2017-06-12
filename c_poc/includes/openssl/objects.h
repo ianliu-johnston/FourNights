@@ -62,7 +62,7 @@
 # define USE_OBJ_MAC
 
 # ifdef USE_OBJ_MAC
-#  include <openssl/obj_mac.h>
+#  include "obj_mac.h"
 # else
 #  define SN_undef                        "UNDEF"
 #  define LN_undef                        "undefined"

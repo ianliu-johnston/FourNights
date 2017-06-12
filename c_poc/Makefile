@@ -2,12 +2,20 @@
 
 CC=gcc
 SRC_DIR=src
-SRC=$(SRC_DIR)/file_operations.c \
+OSSL_DIR=$(SRC_DIR)/openssl
+OSSL_DIR_AES=$(OSSL_DIR)/aes
+OSSL_DIR_EVP=$(OSSL_DIR)/evp
+OSSL_SRC=$(OSSL_DIR_AES)/ \
+	$(OSSL_DIR_EVP)/
+
+SRC=$(SRC_DIR)/encryption.c \
+	$(SRC_DIR)/file_operations.c \
 	$(SRC_DIR)/linked_list_functions.c \
 	$(SRC_DIR)/main.c \
 	$(SRC_DIR)/memory_management.c \
 	$(SRC_DIR)/search.c \
-	$(SRC_DIR)/string_funcs.c
+	$(SRC_DIR)/string_funcs.c \
+	$(OSSL_SRC)
 INCL_DIR=includes
 OBJ=$(SRC:.c=.o)
 NAME=fournights.0.0.1
@@ -49,3 +57,18 @@ clean:
 	$(RM) .*.swp $(NAME)
 
 re: oclean all
+aes_cbc.c
+aes_cfb.c
+aes_core.c
+aes_ctr.c
+aes_ecb.c
+aes.h
+aes_ige.c
+aes_locl.h
+aes_misc.c
+aes_ofb.c
+aes_wrap.c
+aes_x86core.c
+asm
+Makefile
+README

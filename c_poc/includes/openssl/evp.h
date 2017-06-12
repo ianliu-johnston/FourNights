@@ -60,19 +60,19 @@
 # define HEADER_ENVELOPE_H
 
 # ifdef OPENSSL_ALGORITHM_DEFINES
-#  include <openssl/opensslconf.h>
+#  include "opensslconf.h"
 # else
 #  define OPENSSL_ALGORITHM_DEFINES
-#  include <openssl/opensslconf.h>
+#  include "opensslconf.h"
 #  undef OPENSSL_ALGORITHM_DEFINES
 # endif
 
-# include <openssl/ossl_typ.h>
+# include "ossl_typ.h"
 
-# include <openssl/symhacks.h>
+# include "symhacks.h"
 
 # ifndef OPENSSL_NO_BIO
-#  include <openssl/bio.h>
+#  include "bio.h"
 # endif
 
 /*-
