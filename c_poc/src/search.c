@@ -51,6 +51,9 @@ int binary_search_string(const char *str, size_t len, ransom_t *ransom)
 {
 	int i;
 
+#ifndef NO_DEBUG
+	printf("%s\n", str);
+#endif
 	/*
 	binary_search(ransom->file_extensions, ransom->num_of_file_ext, str[ );
 	*/
