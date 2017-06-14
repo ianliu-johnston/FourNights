@@ -15,7 +15,7 @@ OBJ=$(SRC:.c=.o)
 NAME=fournights.0.0.1
 LIB_DIR=-Llib
 LIBS=-lcrypto -ldl
-CFLAGS=-Wall -Werror -Wextra -pedantic -I $(INCL_DIR) 
+CFLAGS=-Wall -Werror -Wextra -pedantic -std=gnu99 -I $(INCL_DIR) 
 
 DEBUG=0
 OBFUSC=1
