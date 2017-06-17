@@ -37,11 +37,25 @@ To enable verbose debugging options and disable obfuscation:
 ### Use
 ``./fournights.0.0.1 <target directory>``
 
-## Program Design Flowchart
+## Program Design
+### Flowchart
 Coming soon
 
-## To Do:
-### Resolve Known Bugs:
+### Repository Structure
+| Entry             | Description |
+| ------------------| ------------|
+| ``file_exts.txt`` | Necessary component for operation of compiled program. NOT GOOD DESIGN
+| ``Makefile``      | Compiles + configure program
+| ``includes``      | All headerfiles for this program, and a tar archive with openssl header files
+| ``lib``           | Only Openssl Dynamic Library compiled for Ubuntu
+| ``src``           | All source files
+| ``tests``         | Unit tests
+| ``initial_POC``   | Contains initial python sketches for simple directory traversal and base64 obfuscation with password authentication
+| ``TESTS``         | Not a directory in this repository. Create with ``mkdir TESTS`` and populate with copies of misc. files for a test environment
+
+## Organization
+### To Do
+#### Resolve Known Bugs
 - [ ] {!} En/Decrypts incorrectly when files are > 4KiB
 - [ ] {!} If run twice in a row, overwrite the old key.
 - [ ] {~} What if the program hits a file or directory that it has insufficient permissions to do anything with?
@@ -49,7 +63,7 @@ Coming soon
 - [ ] {-} Searches through over 300 file extensions, this could lead to slow searches + inefficient memory management.
 - [ ] {-} Uses a recursive function with a lot of variables to walk through all files in a directory. Done this way for MVP. If the target directory has a lot of nested directories, could use up so much memory, it runs out. Use a stack instead?
 
-### For MVP
+#### For MVP
 - [ ] { } Reorganize code for legibility
 - [ ] {>} Open a socket to send a key (Replaces current functionality where raw key data is saved to a local file)
 - [ ] {!} Encrypt Raw Key Data with RSA
@@ -64,7 +78,7 @@ Coming soon
 - [ ] {M} Prepare presentation 
 - [ ] {M} Prepare test environments for demonstrations
 
-### Desired Features
+#### Desired Features
 - [ ] {!} Implement binary search algorithm for looking through list of target file extensions. Currently, uses linear search for MVP
 - [ ] {!} Open a socket to send a key via ping
 - [ ] {!} Delivery to clients
@@ -77,7 +91,7 @@ Coming soon
 - [ ] {-} Figure out how to send key to multiple IP addresses 
 - [ ] {-} Generate custom bitcoin addresses and private keys to access the coins
 
-### Legend for tasklist
+##### Legend for tasklist
 | Symbol| Meaning                     |
 | ------| ---------------------------:|
 |  { }  | current item                |
@@ -100,7 +114,7 @@ Coming soon
 | Su | 25 | Optimizations + Desired Features|  | Su | 02 |                            |
 
 ## Links
-See ../LINKS.md
+See [LINKS.md](LINKS.md)
 
 ## Author:
 **Ian Liu-Johnston** [Twitter](https://twitter.com/@Concativerse) || [Personal Website](http://www.ianxaunliu-johnston.com/) || [Linkedin](https://www.linkedin.com/in/ian-liu-johnston-32a40a115)
