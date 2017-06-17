@@ -5,23 +5,13 @@ Additionally, some anti-debugging and obfuscation features have been added for e
 
 ## Specifications
 <h5>Development Environment</h5>
-
-* ``lsb_release -dirc && uname -pro`` output:
-
-```
-Distributor ID:	Ubuntu
-Description:	Ubuntu 14.04.5 LTS
-Release:	14.04
-Codename:	trusty
-3.13.0-101-generic x86_64 GNU/Linux
-```
-
-* gcc version 4.8.4 (Ubuntu 4.8.4-2ubuntu1~14.04.3)
-* OpenSSL version 1.0.2l (May 2017)
-* Python 3 version 3.4.3
-
-<h5>Tested On</h5>
-- Ubuntu trusty 14.04.5 LTS
+Note: Program tested only in this environment:
+* **Operating System Version**	*Ubuntu 14.04.5 LTS trusty* -- (command: ``lsb_release -dirc``)
+* **Kernel version** *3.13.0-101-generic x86_64 GNU/Linux*  -- (command: ``uname -pro``)
+* **Glibc version** *(Ubuntu EGLIBC 2.19-0ubuntu6.11) 2.19* -- (command: ``ldd --version``)
+* **GCC version** *4.8.4 (Ubuntu 4.8.4-2ubuntu1~14.04.3)*
+* **OpenSSL** *version 1.0.2l (May 2017)*
+* **Python 3** *version 3.4.3*
 
 <h5>Dependencies</h5>
 Uses OpenSSL crypto library for bulk file encryption with AES, encryption of a session key with RSA, and transfer over a network with SSL/TLS.
