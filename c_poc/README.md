@@ -69,22 +69,15 @@ Coming soon
 |  {.}  | done                        |
 
 ### Schedule June 19 - June 30
-| Day| Date| Task                        |
-| ---| ---| ----------------------------|
-| Sa | 17 |                             |
-| Su | 18 |                             |
-| M  | 19 |                             |
-| Tu | 20 |                             |
-| W  | 21 |                             |
-| Th | 22 |                             |
-| F  | 23 |                             |
-| Sa | 24 |                             |
-| Su | 25 |                             |
-| M  | 26 |                             |
-| Tu | 27 |                             |
-| W  | 28 |                             |
-| Th | 29 |                             |
-| F  | 30 | Deadline + Presentation     |
+| Day| Date| Task                       |  | Day| Date| Task                      |
+| ---| ---| ----------------------------| -| ---| ---| ---------------------------|
+| M  | 19 |                             |  | M  | 26 |                            |
+| Tu | 20 |                             |  | Tu | 27 |                            |
+| W  | 21 |                             |  | W  | 28 |                            |
+| Th | 22 |                             |  | Th | 29 |                            |
+| F  | 23 |                             |  | F  | 30 | Final Presentation / Demo  |
+| Sa | 24 |                             |  | Sa | 19 | Take a break!              |
+| Su | 25 |                             |  | Su | 19 |                            |
 
 ## Links
 See ../LINKS.md
