@@ -2,3 +2,5 @@
 a.out
 *.o
 TESTS
+data.key
+TESTS.bak
