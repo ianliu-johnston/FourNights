@@ -27,7 +27,9 @@ Coming soon
 ### Resolve Known Bugs:
 - [ ] {!} En/Decrypts incorrectly when files are > 4KiB
 - [ ] {!} If run twice in a row, overwrite the old key.
-- [ ] {-} What if the program hits a file or directory that it has insufficient permissions to do anything with?
+- [ ] {~} What if the program hits a file or directory that it has insufficient permissions to do anything with?
+- [ ] {~} Depends on the file ``file_exts.txt``, which has to be formatted in one line, to determine which file extensions to target. OK for an MVP, but this design has some serious limitations.
+- [ ] {-} Searches through over 300 file extensions, this could lead to slow searches + inefficient memory management.
 - [ ] {-} Uses a recursive function with a lot of variables to walk through all files in a directory. Done this way for MVP. If the target directory has a lot of nested directories, could use up so much memory, it runs out. Use a stack instead?
 
 ### For MVP
@@ -48,6 +50,7 @@ Coming soon
 ### Desired Features
 - [ ] {!} Implement binary search algorithm for looking through list of target file extensions. Currently, uses linear search for MVP
 - [ ] {!} Open a socket to send a key via ping
+- [ ] {!} Delivery to clients
 - [ ] {~} Anti-Disassembly
 - [ ] {~} Obfuscation
 - [ ] {-} Portability (Currently only tested on Ubuntu)
