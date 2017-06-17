@@ -1,129 +1,132 @@
+/** See tests/openssl_aes_main.c for attribution. **/
+#include <strings.h>
 #include "fournights.h"
 /**
- * AES encryption/decryption demo program using OpenSSL EVP apis
- * gcc -Wall openssl_aes.c -lcrypto
- *
- * this is public domain code.
- *
- * Saju Pillai (saju.pillai@gmail.com)
- * Adapted by Ian Liu-Johnston (iliujohnston@gmail.com)
+  * aes_init - Create a 256 bit key and IV using the supplied key_data
+ (* Fills in the encryption and decryption ctx objects and returns 0 on success
+ (* Gen key & IV for AES 256 CBC mode. A SHA1 digest is used to hash the supplied key material.
+ (* nrounds is the number of times the material is hashed
+ (*
+  * @key_data: the plaintext key
+  * @key_data_len: length of the key
+  * @salt: salt for randomization and more secure keys
+  * @e_ctx: encryption structure
+  * @d_ctx: decryption structure
+  * Return: 0 on success, -1 on failure
  **/
 
+int aes_encrypt_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx)
+{
+	int i = 0, nrounds = 6;
+	unsigned char key[32];
+	unsigned char iv[32];
+	FILE *fd; /* TODO: write to socket instead of a file */
+
+	if (EVP_BytesToKey(EVP_aes_256_cbc(), EVP_sha1(), salt, key_data, key_data_len, nrounds, key, iv) != 32)
+   	{
+#ifndef NO_DEBUG
+		printf("Key size is not 256 bits\n");
+#endif
+		return (-1);
+	}
+	EVP_CIPHER_CTX_init(e_ctx);
+	EVP_EncryptInit_ex(e_ctx, EVP_aes_256_cbc(), NULL, key, iv);
+
+	i++;
+	/* TODO: write to socket instead of file */
+	fd = fopen("/home/vagrant/FourNights/c_poc/data.key", "w+");
+		fwrite(key, sizeof(char), 32, fd);
+		fseek(fd, 32, SEEK_SET);
+		fwrite(iv, sizeof(char), 32, fd);
+	fclose(fd);
+#ifndef NO_DEBUG
+	printf("Key length, e_ctx: %d\nKey:\n", e_ctx->cipher->key_len);
+	for (i = 0; i < e_ctx->cipher->key_len; i++)
+		printf("%02X%c", key[i], i != e_ctx->cipher->key_len - 1 ? ' ' : '\n');
+
+	nrounds = EVP_CIPHER_iv_length(e_ctx->cipher); /* REUSING VARIABLE VERY VERY BAD, but avoiding gcc yelling at me */
+	printf("IV length: %d\nInitialization vector:\n", nrounds);
+	for (i = 0; i < nrounds; i++)
+		printf("%02X%s", e_ctx->oiv[i], i != nrounds - 1 ? " " : "\n");
+	printf("==================\n");
+#endif
+	return (0);
+}
 
 /**
- * Create a 256 bit key and IV using the supplied key_data. salt can be added for taste.
- * Fills in the encryption and decryption ctx objects and returns 0 on success
+  * aes_decrypt_init - Fills in the decryption ctx object from a hash and an iv
+ (* reads raw hashed keydata from a file.
+  * @d_ctx: decryption structure
+  * Return: 0 on success, -1 on failure
  **/
-int aes_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx, EVP_CIPHER_CTX *d_ctx)
+int aes_decrypt_init(EVP_CIPHER_CTX *d_ctx)
 {
-  int i = 0, nrounds = 5;
-  unsigned char key[32], iv[32];
-
-  /*
-   * Gen key & IV for AES 256 CBC mode. A SHA1 digest is used to hash the supplied key material.
-   * nrounds is the number of times the we hash the material. More rounds are more secure but slower.
-   */
-  i = EVP_BytesToKey(EVP_aes_256_cbc(), EVP_sha1(), salt, key_data, key_data_len, nrounds, key, iv);
-  if (i != 32) {
 #ifndef NO_DEBUG
-    printf("Key size is %d bits - should be 256 bits\n", i);
+	int i = 0;
 #endif
-    return -1;
-  }
-  EVP_CIPHER_CTX_init(e_ctx);
-  EVP_EncryptInit_ex(e_ctx, EVP_aes_256_cbc(), NULL, key, iv);
+	unsigned char key[32];
+	unsigned char iv[32];
+	FILE *fd;
 
-  EVP_CIPHER_CTX_init(d_ctx);
-  EVP_DecryptInit_ex(d_ctx, EVP_aes_256_cbc(), NULL, key, iv);
-  return (0);
+	/* TODO: read from socket instead of file */
+	fd = fopen("/home/vagrant/FourNights/c_poc/data.key", "r+");
+		fread(key, sizeof(char), 32, fd);
+		fseek(fd, 32, SEEK_SET);
+		fread(iv, sizeof(char), 32, fd);
+	fclose(fd);
+
+	EVP_CIPHER_CTX_init(d_ctx); /* Basically a memset wrapper */
+	EVP_DecryptInit_ex(d_ctx, EVP_aes_256_cbc(), NULL, key, iv);
+#ifndef NO_DEBUG
+	for (i = 0; i < 32; i++)
+		printf("%02X ", key[i]);
+	putchar('\n');
+	for (i = 0; i < 32; i++)
+		printf("%02X ", iv[i]);
+#endif
+	return (0);
 }
 
 /*
- * Encrypt *len bytes of data
- * All data going in & out is considered binary (unsigned char[])
+ * aes_encrypt - encrypt *len bytes of plaintext
+ * @encrypt: pointer to EVP cipher struct from openssl wrappers
+ * @plaintext: pointer to source plaintext buffer
+ * @len: size of plaintext buffer in bytes
+ * Return: pointer to ciphertext buffer
  */
-unsigned char *aes_encrypt(EVP_CIPHER_CTX *e, unsigned char *plaintext, int *len)
+unsigned char *aes_encrypt(EVP_CIPHER_CTX *encrypt, unsigned char *plaintext, int *len)
 {
-  /* max ciphertext len for a n bytes of plaintext is n + AES_BLOCK_SIZE -1 bytes */
-  int c_len = *len + AES_BLOCK_SIZE, f_len = 0;
-  unsigned char *ciphertext = malloc(c_len);
+	int c_len = 0; /* working length of cyphertext buffer */
+	int f_len = 0; /* final length of cyphertext buffer */
+	unsigned char *ciphertext = NULL;
 
-  EVP_EncryptInit_ex(e, NULL, NULL, NULL, NULL);
-  /* update ciphertext, c_len is filled with the length of ciphertext generated,
-    *len is the size of plaintext in bytes */
-  EVP_EncryptUpdate(e, ciphertext, &c_len, plaintext, *len);
-  /* update ciphertext with the final remaining bytes */
-  EVP_EncryptFinal_ex(e, ciphertext+c_len, &f_len);
-
-  *len = c_len + f_len;
-  return ciphertext;
+	c_len = *len + AES_BLOCK_SIZE;
+	ciphertext = malloc(c_len);
+	EVP_EncryptInit_ex(encrypt, NULL, NULL, NULL, NULL);
+	EVP_EncryptUpdate(encrypt, ciphertext, &c_len, plaintext, *len);
+	EVP_EncryptFinal_ex(encrypt, ciphertext+c_len, &f_len);
+	*len = c_len + f_len;
+	return (ciphertext);
 }
 
-/*
- * Decrypt *len bytes of ciphertext
- */
-unsigned char *aes_decrypt(EVP_CIPHER_CTX *e, unsigned char *ciphertext, int *len)
+/**
+  * aes_decrypt - decrypt *len bytes of ciphertext
+  * @decrypt: pointer to EVP cipher struct from openssl wrappers
+  * @ciphertext: pointer to source encrypted buffer
+  * @len: size of ciphertext buffer in bytes
+  * Return: pointer to plaintext buffer
+ (* note - len plaintext will always be equal to or lesser than length of ciphertext
+ **/
+unsigned char *aes_decrypt(EVP_CIPHER_CTX *decrypt, unsigned char *ciphertext, int *len)
 {
-  /* plaintext will always be equal to or lesser than length of ciphertext*/
-  int p_len = *len, f_len = 0;
-  unsigned char *plaintext = malloc(p_len);
+	int p_len = *len; /* working length of plaintext buffer */
+	int f_len = 0; /* final length of plaintext buffer */
+	unsigned char *plaintext = NULL;
 
-  EVP_DecryptInit_ex(e, NULL, NULL, NULL, NULL);
-  EVP_DecryptUpdate(e, plaintext, &p_len, ciphertext, *len);
-  EVP_DecryptFinal_ex(e, plaintext+p_len, &f_len);
-
-  *len = p_len + f_len;
-  return plaintext;
+	plaintext = malloc(p_len);
+	EVP_DecryptInit_ex(decrypt, NULL, NULL, NULL, NULL);
+	EVP_DecryptUpdate(decrypt, plaintext, &p_len, ciphertext, *len);
+	EVP_DecryptFinal_ex(decrypt, plaintext + p_len, &f_len);
+	*len = p_len + f_len;
+	return (plaintext);
 }
-
-/* int crypt_buffer_aes(unsigned char *key_data, unsigned int salt[], char *buffer)
-int main(int argc, char *argv[])
-{
-	 "opaque" encryption, decryption ctx structures that libcrypto uses to record
-	 status of enc/dec operations
-	EVP_CIPHER_CTX encrypt, decrypt;
-	int key_data_len;
-	char *plaintext;
-	unsigned char *ciphertext;
-	int olen, len;
-	char *key_data = "password";
-	char *buffer = "I am a super duper secret string that nobody can nab";
-	8 bytes to salt the key_data during key generation. This is an example of compiled in salt. We just read the bit pattern created by these two 4 byte integers on the stack as 64 bits of contigous salt material - ofcourse this only works if sizeof(int) >= 4
-	unsigned int salt[] = {12345, 54321};
-
-	key_data_len = my_strlen(key_data);
-	gen key and iv. init the cipher ctx object
-	if (aes_init((unsigned char *)key_data, key_data_len, (unsigned char *)&salt, &encrypt, &decrypt)) {
-		fprintf(stderr, "Couldn't initialize AES cipher\n");
-		return -1;
-	}
-	if (argc != 2)
-	{
-		fprintf(stderr, "Usage: %s <password>", argv[0]);
-		return(1);
-	}
-	Encrypt buffer
-	olen = len = my_strlen(buffer)+1;
-	ciphertext = aes_encrypt(&encrypt, (unsigned char *)buffer, &len);
-	printf("ciphertext: %s\n", ciphertext);
-	if (!(my_strncmp(argv[1], key_data, key_data_len)))
-	{
-		plaintext = (char *)aes_decrypt(&decrypt, ciphertext, &len);
-		if (my_strncmp(plaintext, buffer, olen))
-		  printf("FAIL: enc/dec failed for \"%s\"\n", buffer);
-		else
-		  printf("OK: enc/dec ok for \"%s\"\n", plaintext);
-		printf("plaintext: %s\n", plaintext);
-		free(plaintext);
-		EVP_CIPHER_CTX_cleanup(&decrypt);
-	}
-	else
-	{
-		printf("WRONG\n");
-	}
-	free(ciphertext);
-	EVP_CIPHER_CTX_cleanup(&encrypt);
-
-	return 0;
-}
-*/
