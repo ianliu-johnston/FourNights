@@ -3,12 +3,32 @@ A program to encrypt all files with certain file extensions in a target director
 
 Additionally, some anti-debugging and obfuscation features have been added for extra authenticity.
 
-## Dependencies
-Uses the OpenSSL crypto library for bulk file encryption with AES, encryption of a session key with RSA, and transfer over a network with SSL/TLS.
+## Specifications
+<h5>Development Environment</h5>
+
+* ``lsb_release -dirc && uname -pro`` output:
+
+```
+Distributor ID:	Ubuntu
+Description:	Ubuntu 14.04.5 LTS
+Release:	14.04
+Codename:	trusty
+3.13.0-101-generic x86_64 GNU/Linux
+```
+
+* gcc version 4.8.4 (Ubuntu 4.8.4-2ubuntu1~14.04.3)
+* OpenSSL version 1.0.2l (May 2017)
+* Python 3 version 3.4.3
+
+<h5>Tested On</h5>
+- Ubuntu trusty 14.04.5 LTS
+
+<h5>Dependencies</h5>
+Uses OpenSSL crypto library for bulk file encryption with AES, encryption of a session key with RSA, and transfer over a network with SSL/TLS.
 
 ``libcrypto`` and ``libssl`` libraries are included here. Several standard library functions have been recreated and customized.
 
-## Build:
+## Build
 ``make``
 
 To disable obfuscation functions and macros:
@@ -17,7 +37,7 @@ To disable obfuscation functions and macros:
 To enable verbose debugging options and disable obfuscation:
 ``make DEBUG=1``
 
-## Use
+### Use
 ``./fournights.0.0.1 <target directory>``
 
 ## Program Design Flowchart
@@ -86,4 +106,4 @@ Coming soon
 See ../LINKS.md
 
 ## Author:
-**Ian Xaun Liu-Johnston**
+**Ian Liu-Johnston** [Twitter](https://twitter.com/@Concativerse) || [Personal Website](http://www.ianxaunliu-johnston.com/) || [Linkedin](https://www.linkedin.com/in/ian-liu-johnston-32a40a115)

@@ -12,6 +12,7 @@ Links that were helpful in creating this program and all proof of concepts.
 * [Base64 OpenSSL docs](https://www.openssl.org/docs/man1.0.2/crypto/BIO_f_base64.html)
 
 ### Openssl
+* [Openssl Source Repository](https://www.openssl.org/source/)
 * [OpenSSL Crypto Docs](https://www.openssl.org/docs/man1.0.2/crypto/crypto.html)
 * [Blowfish Openssl](https://www.openssl.org/docs/man1.0.2/crypto/blowfish.html) - Don't use blowfish. It's old and easily broken
 * [OpenSSL AES Example](https://github.com/saju/misc/blob/master/misc/openssl_aes.c) - Use AES
