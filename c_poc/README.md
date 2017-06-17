@@ -71,13 +71,13 @@ Coming soon
 ### Schedule June 19 - June 30
 | Day| Date| Task                       |  | Day| Date| Task                      |
 | ---| ---| ----------------------------| -| ---| ---| ---------------------------|
-| M  | 19 |                             |  | M  | 26 |                            |
-| Tu | 20 |                             |  | Tu | 27 |                            |
-| W  | 21 |                             |  | W  | 28 |                            |
-| Th | 22 |                             |  | Th | 29 |                            |
-| F  | 23 |                             |  | F  | 30 | Final Presentation / Demo  |
-| Sa | 24 |                             |  | Sa | 19 | Take a break!              |
-| Su | 25 |                             |  | Su | 19 |                            |
+| M  | 19 | Reorganize + refactor       |  | M  | 26 | (if necessary) Refactoring + fix glaring bugs|
+| Tu | 20 | Open a socket to send a key |  | Tu | 27 | Unit Testing               |
+| W  | 21 | Server Design: Receive + Store keys |  | W  | 28 | Setup virtual environment for demo|
+| Th | 22 | Server Design: Send keys    |  | Th | 29 | Prepare Final Presentation |
+| F  | 23 | Prompt user for auth        |  | F  | 30 | Final Presentation / Demo  |
+| Sa | 24 | Server Design: Send keys on authentication|  | Sa | 01 | Take a break!              |
+| Su | 25 | Optimizations + Desired Features|  | Su | 02 |                            |
 
 ## Links
 See ../LINKS.md
