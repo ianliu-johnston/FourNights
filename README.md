@@ -46,12 +46,12 @@ Coming soon
 | ------------------| ------------|
 | ``file_exts.txt`` | Necessary component for operation of compiled program. NOT GOOD DESIGN
 | ``Makefile``      | Compiles + configure program
-| ``includes``      | All headerfiles for this program, and a tar archive with openssl header files
-| ``lib``           | Only Openssl Dynamic Library compiled for Ubuntu
-| ``src``           | All source files
-| ``tests``         | Unit tests
-| ``initial_POC``   | Contains initial python sketches for simple directory traversal and base64 obfuscation with password authentication
-| ``TESTS``         | Not a directory in this repository. Create with ``mkdir TESTS`` and populate with copies of misc. files for a test environment
+| ``includes/``     | All headerfiles for this program, and a tar archive with openssl header files
+| ``lib/``          | Only Openssl Dynamic Library compiled for Ubuntu
+| ``src/``          | All source files
+| ``tests/``        | Unit tests
+| ``initial_POC/``  | Contains initial python sketches for simple directory traversal and base64 obfuscation with password authentication
+| ``TESTS/``        | Not a directory in this repository. Create with ``mkdir TESTS`` and populate with copies of misc. files for a test environment
 
 ## Organization
 ### To Do
