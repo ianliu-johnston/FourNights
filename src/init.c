@@ -51,7 +51,6 @@ file_filter_t *init_struct(file_filter_t *file_filter, char *target_dir)
 	for (i = 0; file_filter->file_extensions[i]; i++)
 		printf("%s%s", i ? ", " : "", file_filter->file_extensions[i]);
 	printf("\nKey: %s\n", file_filter->key);
-	printf("salt: %s\n", file_filter->salt);
 #endif
 	return(file_filter);
 }

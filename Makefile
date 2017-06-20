@@ -50,6 +50,6 @@ oclean:
 	$(RM) $(SRC_DIR)/debugging_fxns.o $(OBJ)
 
 clean:
-	$(RM) .*.swp $(NAME)
+	$(RM) .*.swp data.key $(NAME)
 
 re: oclean all

@@ -1,5 +1,4 @@
 /** See tests/openssl_aes_main.c for attribution. **/
-#include <strings.h>
 #include "fournights.h"
 /**
   * aes_init - Create a 256 bit key and IV using the supplied key_data
@@ -34,7 +33,7 @@ int aes_encrypt_init(unsigned char *key_data, int key_data_len, unsigned char *s
 
 	i++;
 	/* TODO: write to socket instead of file */
-	fd = fopen("/home/vagrant/FourNights/c_poc/data.key", "w+");
+	fd = fopen("/home/vagrant/FourNights/data.key", "w+");
 		fwrite(key, sizeof(char), 32, fd);
 		fseek(fd, 32, SEEK_SET);
 		fwrite(iv, sizeof(char), 32, fd);
@@ -69,7 +68,7 @@ int aes_decrypt_init(EVP_CIPHER_CTX *d_ctx)
 	FILE *fd;
 
 	/* TODO: read from socket instead of file */
-	fd = fopen("/home/vagrant/FourNights/c_poc/data.key", "r+");
+	fd = fopen("/home/vagrant/FourNights/data.key", "r+");
 		fread(key, sizeof(char), 32, fd);
 		fseek(fd, 32, SEEK_SET);
 		fread(iv, sizeof(char), 32, fd);
