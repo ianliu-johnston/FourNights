@@ -7,7 +7,7 @@ SRC=$(SRC_DIR)/file_operations.c \
 	$(SRC_DIR)/main.c \
 	$(SRC_DIR)/memory_management.c \
 	$(SRC_DIR)/openssl_aes.c \
-	$(SRC_DIR)/recurse_ls.c \
+	$(SRC_DIR)/traverse_dir.c \
 	$(SRC_DIR)/search.c \
 	$(SRC_DIR)/string_funcs.c
 INCL_DIR=includes
@@ -25,12 +25,6 @@ ifeq ($(DEBUG),1)
 	OBFUSC=0
 else
 	CFLAGS += -DNO_DEBUG
-endif
-
-ifeq ($(OBFUSC),1)
-	SRC += $(SRC_DIR)/obfuscation.c
-else
-	CFLAGS += -D NO_OBFUSCATION
 endif
 
 .PHONY: clean oclean fclean re all $(NAME)
