@@ -51,12 +51,6 @@ int binary_search_string(const char *str, size_t len, file_filter_t *file_filter
 {
 	int i;
 
-#ifndef NO_DEBUG
-	printf("%s\n", str);
-#endif
-	/*
-	binary_search(file_filter->file_extensions, file_filter->num_of_file_ext, str[ );
-	*/
 	for (i = 0; file_filter->file_extensions[i]; i++)
 	{
 		if (find_substr_end((char *)str, file_filter->file_extensions[i]))

@@ -37,17 +37,19 @@ void *traverse_dir(char *dirname, file_filter_t *file_filter)
 		else if ((binary_search_string(read->d_name, len_filename, file_filter) != 0) && S_ISREG(file_info.st_mode) != 0)
 		{
 			file_filter->tmp_bufs->file_info = file_info;
-			my_strncat(file_filter->tmp_bufs->filepath, filepath, 0, my_strlen(filepath));
 			do
 			{
-				file_filter->tmp_bufs->bytes_read = read_file(file_filter->tmp_bufs->filepath, file_filter, write_file);
+				my_strncat(file_filter->tmp_bufs->filepath, filepath, 0, my_strlen(filepath));
+				read_file(file_filter->tmp_bufs->filepath, file_filter, write_file);
 			}
 			while(file_filter->tmp_bufs->file_offset < file_filter->tmp_bufs->file_info.st_size);
+
 			file_filter->tmp_bufs->file_offset = 0;
 			file_filter->tmp_bufs->bytes_read = 0;
 			unlink(filepath);
 		}
 	}
+	/* cleanup after cipher */
 	free(filepath);
 	closedir(dir);
 	return (file_filter);

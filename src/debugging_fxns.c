@@ -9,8 +9,8 @@ void debug_list(tmp_bufs_t *tmp_bufs)
 	printf("bytes_read: %d\n", (int)tmp_bufs->bytes_read);
 	printf("file_offset: %d\n", (int)tmp_bufs->file_offset);
 	printf("st_size: %d\n", (int)tmp_bufs->file_info.st_size);
-	tmp_bufs->buf[400] = '\0';
-	printf("%s...(truncated)...", tmp_bufs->buf);
+	tmp_bufs->plaintext[400] = '\0';
+	printf("%s...(truncated)...", tmp_bufs->plaintext);
 	getchar();
 }
 /**

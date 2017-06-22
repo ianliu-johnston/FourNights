@@ -15,7 +15,7 @@ void *my_memset(void *s, char c, size_t n)
 	if (!s)
 		return (NULL);
 	tmp = (char *)s;
-	for (i = 0; i <= n; i++)
+	for (i = 0; i < n; i++)
 		tmp[i] = c;
 	return ((void *)tmp);
 }

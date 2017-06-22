@@ -7,11 +7,10 @@
  **/
 char *tokenizer(char *str, file_filter_t *file_filter)
 {
-	unsigned int len, count_delims, i;
-	char *saveptr, *token, **tokens;
-	char *str_copied;
+	unsigned int len = 0, count_delims = 0, i = 0;
+	char *saveptr = NULL, *token = NULL, **tokens = NULL;
+	char *str_copied = NULL;
 
-	len = count_delims = 0;
 	if (!file_filter)
 		return (NULL);
 	if (!str)
@@ -19,8 +18,8 @@ char *tokenizer(char *str, file_filter_t *file_filter)
 		file_filter->file_extensions = NULL;
 		return (NULL);
 	}
-	/* count chars in string while counting delims */
-	for (len = 0; str[len]; len++)
+	/* count chars in string while counting delims must have exactly 1 delim*/
+	for (len = 0; str[len] != '\n'; len++)
 		if (str[len] == ' ')
 			count_delims++;
 	str_copied = my_calloc((len + 1) * sizeof(char), sizeof(char));
@@ -33,7 +32,7 @@ char *tokenizer(char *str, file_filter_t *file_filter)
 		tokens[i] = token;
 	}
 	file_filter->file_extensions = tokens;
-	return (tokens[i]);
+	return (tokens[0]);
 }
 
 /**

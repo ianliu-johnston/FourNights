@@ -18,7 +18,7 @@
 #include <sys/utsname.h>
 #include <unistd.h>
 
-#define BIGBUF  4096
+#define BIGBUF  8192 /* 8KiB */
 #define PATH_MAX 4096
 
 /**
@@ -37,7 +37,6 @@ typedef struct tmp_bufs_s
 	off_t file_offset;
 	size_t bytes_read;
 	struct stat file_info;
-	EVP_CIPHER_CTX *cipher;
 } tmp_bufs_t;
 void free_tmp_bufs_struct(tmp_bufs_t tmp_bufs);
 
@@ -46,9 +45,7 @@ void free_tmp_bufs_struct(tmp_bufs_t tmp_bufs);
   * @root_path: string that represents the target filepath
   * @file_exts_whole_str: string that contains all target file extensions
   * @file_extensions: double pointer to a list of file extensions as strings
-  * @key: Oh No! The key is hardcoded!!
-  * @salt: integer array for salt that is converted to 8 bytes
-  * @tmp_bufss: file paths in a linked list
+  * @tmp_bufs: file paths in a linked list
  **/
 typedef struct file_filter_s
 {
@@ -56,7 +53,7 @@ typedef struct file_filter_s
 	char *file_exts_whole_str;
 	char **file_extensions;
 	char cipher_flag; /* 'e' for encrypt, 'd' for decrypt */
-	char *key;
+	EVP_CIPHER_CTX *cipher;
 	tmp_bufs_t *tmp_bufs;
 } file_filter_t;
 
@@ -69,8 +66,8 @@ size_t read_file(const char *filepath, file_filter_t *file_filter, char *(*fxn)(
 char *write_file(char *filepath, file_filter_t *file_filter);
 
 /* Openssl */
-int aes_encrypt_init(unsigned char *key_data, int key_data_len, unsigned char *salt, EVP_CIPHER_CTX *e_ctx);
-int aes_decrypt_init(EVP_CIPHER_CTX *d_ctx);
+EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx);
+EVP_CIPHER_CTX *aes_decrypt_init(EVP_CIPHER_CTX *d_ctx);
 unsigned char *aes_encrypt(EVP_CIPHER_CTX *e, unsigned char *plaintext, int *len);
 unsigned char *aes_decrypt(EVP_CIPHER_CTX *e, unsigned char *ciphertext, int *len);
 
