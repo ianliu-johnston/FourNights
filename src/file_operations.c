@@ -74,14 +74,14 @@ char *write_file(char *buffer, file_filter_t *file_filter)
 	if (file_filter->cipher_flag == 'e') /** ENCRYPT **/
 		cipher_buf = aes_encrypt(file_filter->cipher, (unsigned char *)buffer, &buf_size);
 	else if (file_filter->cipher_flag == 'd') /** DECRYPT **/
-	{
 		cipher_buf = aes_decrypt(file_filter->cipher, (unsigned char *)buffer, (int *)&(file_filter->tmp_bufs->bytes_read));
-	}
 
+	if (file_filter->cipher->buf_len)
+		file_filter->tmp_bufs->bytes_read += (AES_BLOCK_SIZE - file_filter->cipher->buf_len);
 	/* TODO: Does not decrypt the last block */
 	if (fwrite(cipher_buf, file_filter->tmp_bufs->bytes_read, sizeof(char), fd) < 1)
 		fprintf(stderr, "No bytes written\n");
-	printf("%s: %d\n", filepath, file_filter->cipher->buf_len);
+	printf("%lu\n", (unsigned long)file_filter->tmp_bufs->bytes_read);
 	free(cipher_buf);
 	cipher_buf = NULL;
 	fclose(fd);

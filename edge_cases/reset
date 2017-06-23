@@ -1,0 +1,14 @@
+#!/bin/bash
+cp -v 15bytes 15bytes.txt
+echo "==================="
+cp -v 31bytes 31bytes.txt
+echo "==================="
+cp -v m m.c
+cp -v grumpycat grumpycat.jpeg
+cp -v ex_data2 ex_data2.c
+echo "==================="
+rm -rvf *.betty
+echo "==================="
+for i in {1..20}; do 
+	$(./a.out $i > $i.txt)
+done

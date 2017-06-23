@@ -1,0 +1,15 @@
+#!/bin/bash
+
+DIRS={no_read_dir,\
+	  no_read_write_dir,\
+	  no_write_dir,\
+	  no_x_dir}
+
+NO_OWN={not_owner_dir,\
+	    no_read_dir_not_owner,\
+	    no_read_write_dir_not_owner,\
+	    no_write_dir_not_owner,\
+	    no_x_dir_not_owner}
+
+chmod a-r no_read_dir no_read_dir_not_owner no_read_write_dir no_read_write_dir_not_owner
+chmod a-w no_read_dir no_read_dir_not_owner no_read_write_dir no_read_write_dir_not_owner
