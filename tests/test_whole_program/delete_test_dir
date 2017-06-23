@@ -1,0 +1,6 @@
+#!/bin/bash
+
+pushd TESTS >> /dev/null 2>&1
+	sudo chattr -i immutable_file.txt
+popd >> /dev/null 2>&1
+sudo rm -rvf TESTS
