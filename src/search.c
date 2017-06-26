@@ -8,7 +8,8 @@
  * @value: value to search for
  * Return: Index of value if found, -1 on if not found
  */
-static int helper(int *array, size_t size, size_t first, size_t last, int value)
+static int helper(int *array, size_t size,
+					size_t first, size_t last, int value)
 {
 	if (value == array[first])
 		return (first);
@@ -40,23 +41,22 @@ int binary_search(int *array, size_t size, int value)
 	return (helper(array, size, 0, size - 1, value));
 }
 /**
-  * binary_search_string - goes through indicies in array of strings to find first index
+  * search_string - finds substrings
   * @str: String to search through
-  * @len: Length of the string
-  * @file_filter: Main struct with often used values
-  * Return: index of substring, -1 if not found
+  * @file_extensions: double pointer to a list of target file extensions
+  * Return: 1 if found, 0 if not found.
+  * Basic Brute force searching
+  * TODO: Use a search algorithm in an array
  **/
-/* Basic Brute force. TODO: Use a search algorithm in an array*/
-int binary_search_string(const char *str, size_t len, file_filter_t *file_filter)
+int search_string(const char *str, char **file_extensions)
 {
 	int i;
 
-	for (i = 0; file_filter->file_extensions[i]; i++)
+	for (i = 0; file_extensions[i]; i++)
 	{
-		if (find_substr_end((char *)str, file_filter->file_extensions[i]))
+		if (find_substr_end((char *)str, file_extensions[i]))
 			return (1);
 	}
-	len++;
 	return (0);
 }
 

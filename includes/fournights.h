@@ -70,6 +70,7 @@ EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx);
 EVP_CIPHER_CTX *aes_decrypt_init(EVP_CIPHER_CTX *d_ctx);
 unsigned char *aes_encrypt(EVP_CIPHER_CTX *e, unsigned char *plaintext, int *len);
 unsigned char *aes_decrypt(EVP_CIPHER_CTX *e, unsigned char *ciphertext, int *len);
+int check_padding(unsigned char *filepath, size_t size);
 
 /* DEBUGGING */
 #ifndef NO_DEBUG
@@ -88,7 +89,7 @@ char *my_strtok_r(char *str, char *delim, char **saveptr);
 
 /* Search Functions */
 int binary_search(int *array, size_t size, int value);
-int binary_search_string(const char *str, size_t len, file_filter_t *file_filter);
+int search_string(const char *str, char **file_exts);
 unsigned int find_substr_end(char *string, char *substr);
 
 /* Memory Management */

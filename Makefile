@@ -9,7 +9,8 @@ SRC=$(SRC_DIR)/file_operations.c \
 	$(SRC_DIR)/openssl_aes.c \
 	$(SRC_DIR)/traverse_dir.c \
 	$(SRC_DIR)/search.c \
-	$(SRC_DIR)/string_funcs.c
+	$(SRC_DIR)/string_funcs.c \
+	$(SRC_DIR)/string_funcs_strtok.c
 INCL_DIR=includes
 OBJ=$(SRC:.c=.o)
 NAME=fournights.0.0.1

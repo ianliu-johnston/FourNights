@@ -22,17 +22,17 @@ file_filter_t *init_struct(file_filter_t *file_filter, char *target_dir)
 
 	if (!(getcwd(filepath, PATH_MAX - 1)) ||
 		!(my_strncat(filepath, "/file_exts.txt\0", my_strlen(filepath), 15)))
-			return(NULL);
+		return (NULL);
 	lstat(filepath, &(file_filter->tmp_bufs->file_info));
-	if(read_file(filepath, file_filter, tokenizer) < 1)
+	if (read_file(filepath, file_filter, tokenizer) < 1)
 	{
 		fprintf(stderr, "No Bytes read\n");
-		return(NULL);
+		return (NULL);
 	}
 	/* reset file_offset and bytes_read */
 	file_filter->tmp_bufs->file_offset = 0;
 	file_filter->tmp_bufs->bytes_read = 0;
-	return(file_filter);
+	return (file_filter);
 }
 
 /**

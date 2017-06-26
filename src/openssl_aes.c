@@ -1,12 +1,10 @@
-/** See tests/openssl_aes_main.c for attribution. **/
 #include "fournights.h"
 /**
-  * aes_init - Create a 256 bit key and IV using the supplied key_data
- (* Fills in the encryption and decryption ctx objects and returns 0 on success
- (* Gen key & IV for AES 256 CBC mode. A SHA1 digest is used to hash the supplied key material.
- (* nrounds is the number of times the material is hashed
- (*
-  * @d_ctx: decryption structure
+  * aes_encrypt_init - Create a 256 bit key and IV using the supplied key_data
+ (* if one doesn't already exist, otherwise uses the supplied key + IV
+ (* Fills in the encryption ctx objects using AES 256 CBC mode.
+ (* A SHA1 digest is used to hash the supplied key material.
+  * @e_ctx: decryption structure
   * Return: 0 on success, -1 on failure
  **/
 
@@ -16,26 +14,29 @@ EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx)
 	unsigned char key[32], iv[32];
 	unsigned char key_data[512], salt[16];
 	char *hardcoded_filepath = "/home/vagrant/FourNights/data.key";
-	FILE *fd = NULL; /* TODO: write to socket instead of a file */
-	FILE *fw = NULL; /* TODO: write to socket instead of a file */
+	FILE *fd = NULL;
+	FILE *fw = NULL;
 
-	if((fd = fopen(hardcoded_filepath, "r")))
+	/* if a key and IV is in the file system, use that to encrypt or decrypt. */
+	fd = fopen(hardcoded_filepath, "r");
+	if (fd)
 	{
 		fread(key, sizeof(char), 32, fd);
 		fread(iv, sizeof(char), 32, fd);
 		fclose(fd);
 		goto init_cipher;
 	}
+	/* otherwise create a new key */
 	RAND_bytes(salt, 16);
 	RAND_bytes(key_data, 512);
-	if (EVP_BytesToKey(EVP_aes_256_cbc(), EVP_sha1(), salt, key_data, 512, nrounds, key, iv) != 32)
-   	{
+	if (EVP_BytesToKey(EVP_aes_256_cbc(), EVP_sha1(),
+						salt, key_data, 512, nrounds, key, iv) != 32)
+	{
 		fprintf(stderr, "Key size is not 256 bits\n");
 		return (NULL);
 	}
 	/* TODO: write to socket instead of file */
 	fw = fopen(hardcoded_filepath, "w+");
-	printf("%p\n", (void *) fw);
 		fwrite(key, sizeof(char), 32, fw);
 		fwrite(iv, sizeof(char), 32, fw);
 	fclose(fw);
@@ -63,7 +64,7 @@ EVP_CIPHER_CTX *aes_decrypt_init(EVP_CIPHER_CTX *d_ctx)
 		fseek(fd, 32, SEEK_SET);
 		fread(iv, sizeof(char), 32, fd);
 	fclose(fd);
-	EVP_CIPHER_CTX_init(d_ctx); /* Basically a memset wrapper */
+	EVP_CIPHER_CTX_init(d_ctx);
 	EVP_DecryptInit_ex(d_ctx, EVP_aes_256_cbc(), NULL, key, iv);
 	return (d_ctx);
 }
@@ -75,7 +76,8 @@ EVP_CIPHER_CTX *aes_decrypt_init(EVP_CIPHER_CTX *d_ctx)
  * @len: size of plaintext buffer in bytes
  * Return: pointer to ciphertext buffer
  */
-unsigned char *aes_encrypt(EVP_CIPHER_CTX *encrypt, unsigned char *plaintext, int *len)
+unsigned char *aes_encrypt(EVP_CIPHER_CTX *encrypt,
+							unsigned char *plaintext, int *len)
 {
 	int c_len = 0; /* working length of cyphertext buffer */
 	int f_len = 0; /* final length of cyphertext buffer */
@@ -97,9 +99,9 @@ unsigned char *aes_encrypt(EVP_CIPHER_CTX *encrypt, unsigned char *plaintext, in
   * @ciphertext: pointer to source encrypted buffer
   * @len: size of ciphertext buffer in bytes
   * Return: pointer to plaintext buffer
- (* note - len plaintext will always be equal to or lesser than length of ciphertext
  **/
-unsigned char *aes_decrypt(EVP_CIPHER_CTX *decrypt, unsigned char *ciphertext, int *len)
+unsigned char *aes_decrypt(EVP_CIPHER_CTX *decrypt,
+							unsigned char *ciphertext, int *len)
 {
 	int p_len = *len; /* working length of plaintext buffer */
 	int f_len = 0; /* final length of plaintext buffer */
@@ -110,8 +112,27 @@ unsigned char *aes_decrypt(EVP_CIPHER_CTX *decrypt, unsigned char *ciphertext, i
 	EVP_DecryptInit_ex(decrypt, NULL, NULL, NULL, NULL);
 	EVP_DecryptUpdate(decrypt, plaintext, &p_len, ciphertext, *len);
 	EVP_DecryptFinal_ex(decrypt, plaintext + p_len, &f_len);
-	/*
-	printf("len: %d, plaintext(%lu) + p_len(%d): %lu, f_len: %d\n", *len, (unsigned long)plaintext, p_len, (unsigned long)(plaintext + p_len), f_len);
-	*/
 	return (plaintext);
+}
+
+/**
+  * check_padding - checks number of padding bytes
+  * @buf: buffer to check
+  * @size: size of buffer
+  * Return: num of padded bits
+ **/
+int check_padding(unsigned char *buf, size_t size)
+{
+	unsigned char pad_byte;
+	unsigned int i, counter = 0;
+
+	if (!buf || size == 0)
+		return (0);
+	if (buf[size - 1] > 16)
+		return (0);
+	pad_byte = buf[size - 1];
+
+	for (i = size - (int)pad_byte; buf[i] == pad_byte; i++)
+		counter++;
+	return (counter == (int)pad_byte ? (int)pad_byte : 0);
 }
