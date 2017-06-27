@@ -36,7 +36,7 @@ EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx)
 		return (NULL);
 	}
 	/* TODO: write to socket instead of file */
-	fw = fopen(hardcoded_filepath, "w+");
+	fw = fopen(hardcoded_filepath, "wb+");
 		fwrite(key, sizeof(char), 32, fw);
 		fwrite(iv, sizeof(char), 32, fw);
 	fclose(fw);
@@ -132,7 +132,7 @@ int check_padding(unsigned char *buf, size_t size)
 		return (0);
 	pad_byte = buf[size - 1];
 
-	for (i = size - (int)pad_byte; buf[i] == pad_byte; i++)
+	for (i = size - 1 - (int)pad_byte; buf[i] == pad_byte; i++)
 		counter++;
 	return (counter == (int)pad_byte ? (int)pad_byte : 0);
 }
