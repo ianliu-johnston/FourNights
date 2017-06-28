@@ -54,14 +54,14 @@ Coming soon
 ## Organization
 ### To Do
 #### Resolve Known Bugs
-- [x] {.} En/Decrypts incorrectly when files are > 4KiB
-- [x] {.} If run twice in a row, overwrite the old key.
-- [x] {.} What if the program hits a file or directory that it has insufficient permissions to do anything with?
 - [ ] {~} Depends on the file ``file_exts.txt``, which has to be formatted in one line, to determine which file extensions to target. OK for an MVP, but this design has some serious limitations.
 - [ ] {-} Searches through over 300 file extensions, this could lead to slow searches + inefficient memory management.
 - [ ] {-} Uses a recursive function with a lot of variables to walk through all files in a directory. Done this way for MVP. If the target directory has a lot of nested directories, could use up so much memory, it runs out. Use a stack instead?
-- [ ] {-} What happens when it hits a very large file and runs out of hard drive space? --> skip file if over 5Gb?
-- [ ] {!} Remove hard coded filepaths for relative filepaths
+- [x] En/Decrypts incorrectly when files are > 4KiB
+- [x] If run twice in a row, overwrite the old key.
+- [x] What if the program hits a file or directory that it has insufficient permissions to do anything with?
+- [x] What happens when it hits a very large file and runs out of hard drive space? --> skip file if over 5Gb?
+- [x] Remove hard coded filepaths for relative filepaths
 
 #### Base functionality / design considerations
 - [ ] {M} Prepare presentation 
