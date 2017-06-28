@@ -24,7 +24,7 @@ void print_for_debug(struct file_filter_s file_filter)
 
 	/* PRINT STRUCT FOR DEBUGGING */
 	printf("DEBUG 0: root_path: %s\n", file_filter.root_path);
-	printf("DEBUG 2: file extension list \n");
+	printf("DEBUG 2: file extension list\n");
 	debug_dp = file_filter.file_extensions;
 	for (debug_int = 0; debug_dp[debug_int] != NULL; debug_int++)
 		printf("%s%s", debug_int == 0 ? "" : ", ", debug_dp[debug_int]);

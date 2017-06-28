@@ -1,6 +1,13 @@
 #include "fournights.h"
 #include "obfuscation.h"
 
+/**
+  * simple_search - Nothing function. Used for obfuscation
+  * @filepath: Junk data used for nothing
+  * @value2: junk also
+  * Return: 0, should segfault or throw an arithmetic error
+ (* if it detects a weakling debugger, or hits an appropriate signal
+ **/
 int simple_search(void *filepath, size_t value2)
 {
 	size_t i; char *lala;
