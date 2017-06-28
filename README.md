@@ -64,12 +64,12 @@ Coming soon
 - [x] Remove hard coded filepaths for relative filepaths
 
 #### Base functionality / design considerations
+- [ ] { } Encrypt Raw Key Data with RSA
+- [ ] { } Reorganize code for legibility -- on going
 - [ ] {M} Prepare presentation 
 - [ ] {M} Prepare test environments for demonstrations
 - [ ] {M} Figure out how to prompt user for decryption authentication
-- [ ] { } Reorganize code for legibility -- on going
 - [ ] {-} Open a socket to send a key (Replaces current functionality where raw key data is saved to a local file)
-- [ ] {!} Encrypt Raw Key Data with RSA
 - [ ] {-} Figure out system design for server
   - [ ] How to listen for keys
   - [ ] How to store keys
