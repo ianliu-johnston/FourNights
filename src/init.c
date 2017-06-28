@@ -23,9 +23,16 @@ file_filter_t *init_struct(file_filter_t *file_filter, char *target_dir)
 		return (NULL);
 	}
 	file_filter->tmp_bufs->plaintext = malloc(BIGBUF * sizeof(char));
+	if (!file_filter->tmp_bufs->plaintext)
+	{
+		free(file_filter->tmp_bufs->filepath);
+		free(file_filter->tmp_bufs);
+		return (NULL);
+	}
 	file_filter->tmp_bufs->file_offset = 0;
 	file_filter->tmp_bufs->bytes_read = 0;
 	file_filter->root_path = target_dir;
+	file_filter->uid = geteuid();
 
 	if (!(getcwd(filepath, PATH_MAX - 1)) ||
 		!(my_strncat(filepath, "/file_exts.txt\0", my_strlen(filepath), 15)))

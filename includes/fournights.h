@@ -55,6 +55,7 @@ typedef struct file_filter_s
 	char *file_exts_whole_str;
 	char **file_extensions;
 	char cipher_flag;
+	uid_t uid;
 	EVP_CIPHER_CTX *cipher;
 	tmp_bufs_t *tmp_bufs;
 } file_filter_t;
