@@ -131,8 +131,7 @@ int check_padding(unsigned char *buf, size_t size)
 	if (buf[size - 1] > 16)
 		return (0);
 	pad_byte = buf[size - 1];
-
-	for (i = size - 1 - (int)pad_byte; buf[i] == pad_byte; i++)
+	for (i = size - (int)pad_byte; buf[i] == pad_byte; i++)
 		counter++;
 	return (counter == (int)pad_byte ? (int)pad_byte : 0);
 }

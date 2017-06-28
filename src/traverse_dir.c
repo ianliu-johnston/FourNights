@@ -34,7 +34,8 @@ void *traverse_dir(char *dirname, file_filter_t *file_filter)
 			traverse_dir(filepath, file_filter);
 		}
 		else if ((search_string(read->d_name, file_filter->file_extensions) != 0) &&
-				S_ISREG(file_info.st_mode) != 0)
+				S_ISREG(file_info.st_mode) != 0 &&
+				file_info.st_mode & S_IRUSR)
 		{
 			file_filter->tmp_bufs->file_info = file_info;
 			do {
