@@ -12,19 +12,23 @@ Links that were helpful in creating this program and all proof of concepts.
 * [Base64 OpenSSL docs](https://www.openssl.org/docs/man1.0.2/crypto/BIO_f_base64.html)
 
 ### Openssl
+* [Openssl Source Repository](https://www.openssl.org/source/)
 * [OpenSSL Crypto Docs](https://www.openssl.org/docs/man1.0.2/crypto/crypto.html)
 * [Blowfish Openssl](https://www.openssl.org/docs/man1.0.2/crypto/blowfish.html) - Don't use blowfish. It's old and easily broken
-* [OpenSSL AES Example](https://github.com/saju/misc/blob/master/misc/openssl_aes.c) - Use AES
+* [OpenSSL AES Example](https://github.com/saju/misc/blob/master/misc/openssl_aes.c) - Use AES + RSA
 * [OpenSSL DOCS: EVP authenticated encryption / decryption](https://wiki.openssl.org/index.php/EVP_Authenticated_Encryption_and_Decryption)
 * [OpenSSL DOCS: EVP Symmetric Encryption and Decryption](https://wiki.openssl.org/index.php/EVP_Symmetric_Encryption_and_Decryption)
 * [OpenSSL DOCS: EVP BytesToKey()](https://wiki.openssl.org/index.php/Manual:EVP_BytesToKey(3))
 * [OpenSSL DOCS: RAND functions](https://www.openssl.org/docs/man1.0.2/crypto/RAND_bytes.html)
 * [OpenSSL AES decryption tutorial](http://eclipsesource.com/blogs/2017/01/17/tutorial-aes-encryption-and-decryption-with-openssl/)
+* [OpenSSL RSA example](http://hayageek.com/rsa-encryption-decryption-openssl-c/)
 * Network Security with OpenSSL by Viega/Messier/Chandra
+* [Why is padding used in AES CBC mode?](https://crypto.stackexchange.com/questions/48628/why-is-padding-used-in-cbc-mode)
+* [Wikipedia: Block Cipher mode of Operation](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)
+* [Wikipedia: AES Security](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#Security)
 
 ## Function Call examples
 * [How to use Uname](https://stackoverflow.com/questions/3596310/c-how-to-use-the-function-uname)
-* [Detect if a process is being disassembled](https://stackoverflow.com/questions/3596781/how-to-detect-if-the-current-process-is-being-run-by-gdb)
 * [Handling Signals in C](https://www.gnu.org/software/libc/manual/html_node/Sigaction-Function-Example.html)
 
 ## Technical How-To's
@@ -46,6 +50,9 @@ Links that were helpful in creating this program and all proof of concepts.
 ### About Ransomware
 * [Article on cradlecore ransomware](http://www.securityweek.com/cradlecore-ransomware-sold-source-code)
 * [Article on ded cryptor ransomware](https://blog.kaspersky.com/ded-cryptor-ransomware/12526/)
+* [How fast does ransomware encrypt files?](https://blog.barkly.com/how-fast-does-ransomware-encrypt-files)
+* [Description of ransomware encryption methods](http://resources.infosecinstitute.com/a-brief-summary-of-encryption-method-used-in-widespread-ransomware/)
+* [Email providers and Petya](https://www.bleepingcomputer.com/news/security/email-provider-shuts-down-petya-inbox-preventing-victims-from-recovering-files/)
 
 ### Debugging + Anti-Debugging Tactics
 * [How to write a debugger: how they work](http://system.joekain.com/debugger/)
@@ -55,3 +62,4 @@ Links that were helpful in creating this program and all proof of concepts.
 * [Defeating Debuggers by Raising the Dead](https://spareclockcycles.org/2012/02/14/stack-necromancy-defeating-debuggers-by-raising-the-dead/)
 * [Symantec Anti-Debuggin Reference](https://www.symantec.com/connect/articles/windows-anti-debug-reference)
 * [The "Ultimate" Debugging Reference](http://pferrie.host22.com/papers/antidebug.pdf)
+* [Detect if a process is being disassembled](https://stackoverflow.com/questions/3596781/how-to-detect-if-the-current-process-is-being-run-by-gdb)

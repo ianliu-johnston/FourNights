@@ -1,0 +1,84 @@
+#!/bin/bash
+
+if [[ "$#" -eq 1 ]]; then
+	echo "Creating simple directory structure"
+	wget -q https://raw.githubusercontent.com/openssl/openssl/master/crypto/evp/encode.c
+	wget -q https://ianxaunliu-johnston.com/holberton/img/header_bkg_image-small.png
+	echo "123456789abdef" >> 15bytes.txt
+	echo "0123456789abdef" >> 16bytes.txt
+	echo "0123456789abdef123456789abcdef" >> 31bytes.txt
+	echo "0123456789abdef0123456789abcdef" >> 32bytes.txt
+	exit
+fi
+mkdir -v TESTS
+pushd TESTS >> /dev/null 2>&1
+echo "#########################"
+echo "Regular Files"
+echo "#########################"
+echo "Grabbing some real content from the internet"
+wget -q https://raw.githubusercontent.com/openssl/openssl/master/crypto/evp/encode.c
+wget -q https://ianxaunliu-johnston.com/holberton/img/header_bkg_image-small.png
+echo "Creating a 100M file full of random bytes"
+dd if=/dev/urandom of=large_file.html bs=104857601 count=1
+echo "abcdefghijklmnopqrstuvwxyz1234567890" >> ignored_file
+echo "Generating files with sized from 1 byte to 31 bytes"
+mkdir -v precisely_sized_files
+pushd precisely_sized_files >> /dev/null 2>&1
+echo -ne '#include <stdio.h>\nint main(int ac, char *av[])\n{\nint i;\nfor (i = 0; i < atoi(av[1]); i++)\nputchar(i + "a");\nputchar("\\n");\nreturn(0);\n}\n' > t.c
+sed -i "s/\"/'/g" t.c
+gcc t.c -o specific_byte_sizes
+for i in {1..31}; do 
+	$(./specific_byte_sizes $i > $i.txt);
+	echo -n "."
+done
+for i in {1..15}; do
+	$(./specific_byte_sizes $i > .hidden_$i.txt);
+	echo -n "."
+done
+popd >> /dev/null 2>&1
+echo "Generating files with non-printing characters. Only 1 char sized files"
+mkdir non_printing_characters
+pushd non_printing_characters
+echo -ne '#include <stdio.h>\nint main(int ac, char *av[])\n{\nputchar(atoi(av[1]));\nputchar("\\n");\nreturn(0);\n}\n' > b.c
+sed -i "s/\"/'/g" b.c
+gcc b.c -o non_print_chars
+for i in {1..31}; do 
+	$(./non_print_chars $i > non_printing-$i.txt);
+	echo -n "."
+done
+popd
+echo "Files inside of nested directories"
+mkdir -p this/is/a/very/long/list/of/nested/directories/going/to
+echo "qwertyuiop[]asdfghjkl;'zxcvbnm,./" >> this/is/a/very/long/list/of/nested/directories/going/to/nothing.txt
+echo "#########################"
+echo "Wrong Permissions"
+echo "#########################"
+mkdir 0 111 222 333 444 555 666 777
+for (( i=0;i<888;i+=111)); do
+	pushd $i  >> /dev/null 2>&1
+		echo "abcdefghijklmnopqrstuvwxyz" >> content.txt
+		echo "abcdefghijklmnopqrstuvwxyz" >> ignored_content
+	popd  >> /dev/null 2>&1
+	cp ignored_file perms_$i.txt
+	chmod $i $i perms_$i.txt
+done
+
+echo "#########################"
+echo "No ownership and immutables"
+echo "#########################"
+echo "0123456789abcdef0123456789" >> immutable_file.txt
+sudo chattr +i immutable_file.txt
+echo "abcdefghijklmnopqrstuvwxyz" >> not_owner.txt
+sudo chown root:root not_owner.txt
+
+
+echo "#########################"
+echo "Symlinks and Sockets"
+echo "#########################"
+touch tmp
+ln -s tmp broken_symlink
+rm tmp
+ln -s encode.c active_symlink
+python -c "import socket as s; k = s.socket(s.AF_UNIX); k.bind('socket_file')" 
+
+popd  >> /dev/null 2>&1

@@ -1,2 +1,6 @@
 .*.swp
 a.out
+*.o
+TESTS
+data.key
+fournights.0.0.1
