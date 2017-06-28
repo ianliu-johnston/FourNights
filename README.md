@@ -1,7 +1,5 @@
 # FourNights: C implementation
-A program to encrypt all files with certain file extensions in a target directory. Creates a custom key, and sends that key over a socket to a remote server, which sends the key back when properly authenticated. Can be used for good OR evil. Please don't use it for evil. I am not responsible for how this software is used.
-
-Additionally, some anti-debugging and obfuscation features have been added for extra authenticity.
+A program to encrypt all files with certain file extensions in a target directory. Creates a custom key, and sends that key over a socket to a remote server, which sends the key back when properly authenticated. I am not responsible for how this software is used.
 
 ## Specifications
 <h5>Development Environment</h5>
@@ -56,40 +54,42 @@ Coming soon
 ## Organization
 ### To Do
 #### Resolve Known Bugs
-- [ ] {!} En/Decrypts incorrectly when files are > 4KiB
-- [ ] {!} If run twice in a row, overwrite the old key.
-- [ ] {~} What if the program hits a file or directory that it has insufficient permissions to do anything with?
+- [x] {.} En/Decrypts incorrectly when files are > 4KiB
+- [x] {.} If run twice in a row, overwrite the old key.
+- [x] {.} What if the program hits a file or directory that it has insufficient permissions to do anything with?
 - [ ] {~} Depends on the file ``file_exts.txt``, which has to be formatted in one line, to determine which file extensions to target. OK for an MVP, but this design has some serious limitations.
 - [ ] {-} Searches through over 300 file extensions, this could lead to slow searches + inefficient memory management.
 - [ ] {-} Uses a recursive function with a lot of variables to walk through all files in a directory. Done this way for MVP. If the target directory has a lot of nested directories, could use up so much memory, it runs out. Use a stack instead?
+- [ ] {-} What happens when it hits a very large file and runs out of hard drive space? --> skip file if over 5Gb?
+- [ ] {!} Remove hard coded filepaths for relative filepaths
 
-#### For MVP
-- [ ] { } Reorganize code for legibility
-- [ ] {>} Open a socket to send a key (Replaces current functionality where raw key data is saved to a local file)
+#### Base functionality / design considerations
+- [ ] {M} Prepare presentation 
+- [ ] {M} Prepare test environments for demonstrations
+- [ ] {M} Figure out how to prompt user for decryption authentication
+- [ ] { } Reorganize code for legibility -- on going
+- [ ] {-} Open a socket to send a key (Replaces current functionality where raw key data is saved to a local file)
 - [ ] {!} Encrypt Raw Key Data with RSA
-- [ ] {M} Figure out system design for server
+- [ ] {-} Figure out system design for server
   - [ ] How to listen for keys
   - [ ] How to store keys
   - [ ] How to send back keys
   - [ ] How to listen for proper authentication
-- [ ] {M} Figure out how to prompt user for decryption authentication
 - [ ] {-} Case insensitive file extension search
 - [ ] {-} Unit Testing
-- [ ] {M} Prepare presentation 
-- [ ] {M} Prepare test environments for demonstrations
 
 #### Desired Features
 - [ ] {!} Implement binary search algorithm for looking through list of target file extensions. Currently, uses linear search for MVP
-- [ ] {!} Open a socket to send a key via ping
-- [ ] {!} Delivery to clients
-- [ ] {~} Anti-Disassembly
-- [ ] {~} Obfuscation
+- [ ] {~} Open a socket to send a key via ping
+- [ ] {~} Delivery to clients
 - [ ] {-} Portability (Currently only tested on Ubuntu)
   - [ ] Server to send system appropriate binary
-- [ ] {-} Stealth
-- [ ] {-} Sandbox detection
 - [ ] {-} Figure out how to send key to multiple IP addresses 
 - [ ] {-} Generate custom bitcoin addresses and private keys to access the coins
+- [ ] {-} Anti-Disassembly
+- [ ] {-} Obfuscation
+- [ ] {-} Stealth
+- [ ] {-} Sandbox detection
 
 ##### Legend for tasklist
 | Symbol| Meaning                     |
