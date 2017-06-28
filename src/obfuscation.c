@@ -9,14 +9,14 @@ int simple_search(void *filepath, size_t value2)
 
 	a = 0;
 	lala = (char *)filepath;
-	lala = "tee hee";
+	lala = "c\0\0\0\0";
 	i = my_strlen(lala);
 
 	for (i = 0; i < value2; i++)
 	{
 		a = lala[i];
 		if ((a ^ 0x55) == 0x99)
-			return (1);
+			raise(SIGFPE);
 	}
 	f = fork();
 	if (f == 0)
