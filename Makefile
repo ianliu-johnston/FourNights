@@ -28,6 +28,12 @@ else
 	CFLAGS += -DNO_DEBUG
 endif
 
+ifeq ($(OBFUSC), 1)
+	SRC +=  $(SRC_DIR)/obfuscation.c
+else
+	CFLAGS += -DNO_OBFUSCATION
+endif
+
 .PHONY: clean oclean fclean re all $(NAME)
 all: $(SRC) $(NAME)
 

@@ -14,7 +14,14 @@ file_filter_t *init_struct(file_filter_t *file_filter, char *target_dir)
 		return (NULL);
 	/* TODO: Check for errors later */
 	file_filter->tmp_bufs = malloc(sizeof(tmp_bufs_t));
+	if (!file_filter->tmp_bufs)
+		return (NULL);
 	file_filter->tmp_bufs->filepath = my_calloc((PATH_MAX - 1) * sizeof(char), sizeof(char));
+	if (!file_filter->tmp_bufs->filepath)
+	{
+		free(file_filter->tmp_bufs);
+		return (NULL);
+	}
 	file_filter->tmp_bufs->plaintext = malloc(BIGBUF * sizeof(char));
 	file_filter->tmp_bufs->file_offset = 0;
 	file_filter->tmp_bufs->bytes_read = 0;
