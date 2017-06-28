@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 		return (EXIT_FAILURE);
 	my_strncat(target_dir, "/TESTS/\0", my_strlen(target_dir), 8);
 	if (argc == 1)
-		init_struct(&file_filter, target_dir);
+		init_struct(&file_filter, (char *)target_dir);
 	else
 		init_struct(&file_filter, argv[1]); /* Security Hole, I think */
 	file_filter.cipher = aes_encrypt_init(&encrypt);
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 	file_filter.cipher_flag = 'd';
 	file_filter.cipher = aes_decrypt_init(&decrypt);
 	if (!file_filter.cipher)
-		printf("Could not decrypt your data, sorry.\n");
+		fprintf(stderr, "Could not decrypt your data, sorry.\n");
 	/* reset file extension tokens */
 	my_strncat(file_filter.file_exts_whole_str, ".betty\0", 0, 7);
 	file_filter.file_extensions[1] = NULL;

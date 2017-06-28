@@ -17,6 +17,7 @@ file_filter_t *init_struct(file_filter_t *file_filter, char *target_dir)
 	tmp_bufs = malloc(sizeof(tmp_bufs_t));
 	if (!tmp_bufs)
 		return (NULL);
+	file_filter->tmp_bufs = tmp_bufs;
 	tmp_bufs->filepath = my_calloc((PATH_MAX - 1) * sizeof(char), sizeof(char));
 	if (!tmp_bufs->filepath)
 	{
@@ -37,8 +38,13 @@ file_filter_t *init_struct(file_filter_t *file_filter, char *target_dir)
 	if (!(getcwd(filepath, PATH_MAX - 1)) ||
 		!(my_strncat(filepath, "/file_exts.txt\0", my_strlen(filepath), 15)))
 		return (NULL);
-	lstat(filepath, &(tmp_bufs->file_info));
-	if (read_file(filepath, file_filter, tokenizer) < 1)
+	if (lstat(filepath, &(tmp_bufs->file_info)) == -1)
+	{
+		fprintf(stderr, "File not found\n");
+		return (0);
+	}
+
+	if (read_file((char *)filepath, file_filter, tokenizer) < 1)
 	{
 		fprintf(stderr, "No Bytes read\n");
 		return (NULL);
@@ -46,7 +52,6 @@ file_filter_t *init_struct(file_filter_t *file_filter, char *target_dir)
 	/* reset file_offset and bytes_read */
 	tmp_bufs->file_offset = 0;
 	tmp_bufs->bytes_read = 0;
-	file_filter->tmp_bufs = tmp_bufs;
 	return (file_filter);
 }
 
