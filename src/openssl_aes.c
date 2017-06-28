@@ -10,7 +10,7 @@
 
 EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx)
 {
-	int nrounds = 6;
+	int nrounds = 24;
 	unsigned char key[32], iv[32];
 	unsigned char key_data[512], salt[16];
 	char *hardcoded_filepath = "/home/vagrant/FourNights/data.key";
@@ -21,8 +21,10 @@ EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx)
 	fd = fopen(hardcoded_filepath, "r");
 	if (fd)
 	{
-		fread(key, sizeof(char), 32, fd);
-		fread(iv, sizeof(char), 32, fd);
+		if (!fread(key, sizeof(char), 32, fd))
+			return(NULL);
+		if (!fread(iv, sizeof(char), 32, fd))
+			return(NULL);
 		fclose(fd);
 		goto init_cipher;
 	}
@@ -60,9 +62,11 @@ EVP_CIPHER_CTX *aes_decrypt_init(EVP_CIPHER_CTX *d_ctx)
 
 	/* TODO: read from socket instead of file */
 	fd = fopen("/home/vagrant/FourNights/data.key", "r");
-		fread(key, sizeof(char), 32, fd);
+		if (!fread(key, sizeof(char), 32, fd))
+			return(NULL);
 		fseek(fd, 32, SEEK_SET);
-		fread(iv, sizeof(char), 32, fd);
+		if (!fread(iv, sizeof(char), 32, fd))
+			return(NULL);
 	fclose(fd);
 	EVP_CIPHER_CTX_init(d_ctx);
 	EVP_DecryptInit_ex(d_ctx, EVP_aes_256_cbc(), NULL, key, iv);
@@ -128,7 +132,7 @@ int check_padding(unsigned char *buf, size_t size)
 
 	if (!buf || size == 0)
 		return (0);
-	if (buf[size - 1] > 16)
+	if (buf[size - 1] > 16) /* all padding characters will be < 16 */
 		return (0);
 	pad_byte = buf[size - 1];
 	for (i = size - (int)pad_byte; buf[i] == pad_byte; i++)
