@@ -8,6 +8,7 @@ SRC=$(SRC_DIR)/file_operations.c \
 	$(SRC_DIR)/memory_management.c \
 	$(SRC_DIR)/openssl_aes.c \
 	$(SRC_DIR)/openssl_rsa.c \
+	$(SRC_DIR)/openssl_encrypt_sym_key.c \
 	$(SRC_DIR)/traverse_dir.c \
 	$(SRC_DIR)/search.c \
 	$(SRC_DIR)/string_funcs.c \

