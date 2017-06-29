@@ -1,10 +1,10 @@
 # FourNights: C implementation
-A program to encrypt all files with certain file extensions in a target directory. Creates a custom key, and sends that key over a socket to a remote server, which sends the key back when properly authenticated. I am not responsible for how this software is used.
+A program to encrypt all files with certain file extensions in a target directory. Creates a custom key, and stores it in the directory the binary is. Requires a list of file extensions, a public key, and a private key. I am not responsible for how this software is used.
 
 ## Specifications
 <h5>Development Environment</h5>
 
-Note: Program tested only in this environment:
+Program tested only in this environment:
 
 * **Operating System Version**	*Ubuntu 14.04.5 LTS trusty* -- (command: ``lsb_release -dirc``)
 
@@ -19,9 +19,11 @@ Note: Program tested only in this environment:
 * **Python 3** *version 3.4.3*
 
 <h5>Dependencies</h5>
-Uses OpenSSL crypto library for bulk file encryption with AES, encryption of a session key with RSA, and transfer over a network with SSL/TLS.
+Uses OpenSSL crypto library for bulk file encryption with AES, encryption of a session key with RSA, and (future dev)transfer over a network with SSL/TLS.
 
 ``libcrypto`` and ``libssl`` libraries are included here. Several standard library functions have been recreated and customized.
+
+Encryption scheme itself is AES 256 CBC mode.
 
 ## Build
 ``make``
@@ -33,7 +35,30 @@ To enable verbose debugging options and disable obfuscation:
 ``make DEBUG=1``
 
 ### Use
+Required Files must be in the same directory:
+1. ``fournights.0.0.1`` -- complied binary
+2. ``file_exts.txt`` -- file with file extensions to encrypt
+3. ``public.pem`` -- public key used to encrypt the AES symmetric key
+4. ``private.pem`` -- private key used to decrypt the AES key
+5. ``TESTS/`` -- Directory that contains all target files. Required if the program is run without any arguments.
+
 ``./fournights.0.0.1 <target directory>``
+If the program is run without a command line argument, it will default to trying to encrypt everything in a directory called "TESTS" that is in the current working directory. It will segfault if that directory does not exist. This is a built in vulnerability.
+
+Requires a file ``file_exts.txt`` with a list of sorted file extensions, with each file extension separated by a single space. This is a built in vulnerability. 
+Example:
+
+```
+.c .gif .h .jpg .pdf .zip
+```
+
+Files are encrypted with a randomly generated AES symmetric key, which is then encrypted with a RSA public key. This key is contained in another required file, called public.pem. This is feature currently in development. What some encryption programs do is to send a petition to a server, which then sends a public key to do the encryption with. This is not implemented.
+
+To generate a private RSA key with openssl:
+``openssl genrsa -out private.pem 4096``
+
+To create a public key from that private key:
+``openssl rsa -in private.pem -outform PEM -pubout -out public.pem``
 
 ## Program Design
 ### Flowchart
@@ -66,6 +91,7 @@ Coming soon
 #### Base functionality / design considerations
 - [ ] { } Encrypt Raw Key Data with RSA
 - [ ] { } Reorganize code for legibility -- on going
+- [ ] { } Unit Testing
 - [ ] {M} Prepare presentation 
 - [ ] {M} Prepare test environments for demonstrations
 - [ ] {M} Figure out how to prompt user for decryption authentication
@@ -76,7 +102,6 @@ Coming soon
   - [ ] How to send back keys
   - [ ] How to listen for proper authentication
 - [ ] {-} Case insensitive file extension search
-- [ ] {-} Unit Testing
 
 #### Desired Features
 - [ ] {!} Implement binary search algorithm for looking through list of target file extensions. Currently, uses linear search for MVP

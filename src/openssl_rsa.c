@@ -89,10 +89,10 @@ static int rsa_cipher(unsigned char *plaintext,
 }
 
 /**
-  * public_encrypt - tiny wrapper for RSA_public_encrypt function
-  * @plaintext: pointer to plaintext buffer
+  * rsa_public_encrypt - tiny wrapper for rsa_cipher encryption mode
+  * @dec: pointer to plaintext buffer
   * @data_len: length of buffer
-  * @decrypted: pointer to encrypted buffer
+  * @enc: pointer to encrypted buffer
   * Return: Length of encrypted buffer
  **/
 int rsa_public_encrypt(unsigned char *dec,
@@ -103,10 +103,10 @@ int rsa_public_encrypt(unsigned char *dec,
 }
 
 /**
-  * private_decrypt - tiny wrapper for RSA_private_decrypt function
-  * @enc_data: pointer to encrypted buffer
+  * rsa_private_decrypt - tiny wrapper for rsa_cipher decryption mode
+  * @enc: pointer to encrypted buffer
   * @data_len: length of encrypted buffer
-  * @decrypted: pointer to decrypted buffer
+  * @dec: pointer to decrypted buffer
   * Return: Length of decrypted buffer
  **/
 int rsa_private_decrypt(unsigned char *enc,
