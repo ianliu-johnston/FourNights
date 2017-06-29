@@ -54,7 +54,8 @@ void *traverse_dir(char *dirname, file_filter_t *file_filter)
 
 		if (!(file_info.st_mode & S_IRUSR) || /* user has no read permissions? */
 			file_info.st_size > 5368709120 || /* file > 5 GiB? */
-			file_filter->uid != file_info.st_uid) /* user doesn't own file? */
+			(file_filter->uid != file_info.st_uid && /* user doesn't own file? */
+			 file_filter->uid != 0)) /* and is not root */
 			continue;
 		if (S_ISDIR(file_info.st_mode) != 0) /* file is dir? */
 		{

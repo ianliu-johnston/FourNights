@@ -22,6 +22,7 @@ Links that were helpful in creating this program and all proof of concepts.
 * [OpenSSL DOCS: RAND functions](https://www.openssl.org/docs/man1.0.2/crypto/RAND_bytes.html)
 * [OpenSSL AES decryption tutorial](http://eclipsesource.com/blogs/2017/01/17/tutorial-aes-encryption-and-decryption-with-openssl/)
 * [OpenSSL RSA example](http://hayageek.com/rsa-encryption-decryption-openssl-c/)
+* [RSA implementation](https://shanetully.com/2012/04/simple-public-key-encryption-with-rsa-and-openssl/)
 * Network Security with OpenSSL by Viega/Messier/Chandra
 * [Why is padding used in AES CBC mode?](https://crypto.stackexchange.com/questions/48628/why-is-padding-used-in-cbc-mode)
 * [Wikipedia: Block Cipher mode of Operation](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)

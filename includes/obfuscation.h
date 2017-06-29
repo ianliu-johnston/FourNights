@@ -17,6 +17,11 @@
 #define aes_decrypt					 sha256_block_data_order_sse3
 #define check_padding				sk_deep_search
 
+#define rsa_public_encrypt			BIO_new_UNDEF
+#define rsa_private_decrypt			CRYPTO_unlock
+#define encrypt_key_iv				hmac_key_meth
+#define decrypt_key_iv				policy_cache_free_mapping
+
 #define tokenizer					__stack_check_fail
 #define my_strncmp					deregester_tm_clones
 #define my_strlen					threaded_callback

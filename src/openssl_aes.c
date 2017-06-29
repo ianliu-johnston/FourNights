@@ -1,51 +1,35 @@
 #include "fournights.h"
+#ifndef AES_H
+#define AES_H
+  #include <openssl/aes.h>
+  #include <openssl/rand.h>
+#endif
 /**
   * aes_encrypt_init - Create a 256 bit key and IV using the supplied key_data
- (* if one doesn't already exist, otherwise uses the supplied key + IV
  (* Fills in the encryption ctx objects using AES 256 CBC mode.
  (* A SHA1 digest is used to hash the supplied key material.
   * @e_ctx: decryption structure
-  * Return: 0 on success, -1 on failure
+  * Return: pointer to the EVP_CIPHER_CTX structure or NULL on errors
  **/
-
 EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx)
 {
-	int nrounds = 24;
+	int rounds = 24;
 	unsigned char key[32], iv[32];
 	unsigned char key_data[512], salt[16];
-	char key_path[PATH_MAX];
-	FILE *fd = NULL;
-	FILE *fw = NULL;
 
-	/* if a key and IV is in the file system, use that to encrypt or decrypt. */
-	if (!getcwd(key_path, PATH_MAX))
-		return (NULL);
-	my_strncat(key_path, "/data.key\0", my_strlen(key_path), 10);
-	fd = fopen(key_path, "r");
-	if (fd)
-	{
-		if (!fread(key, sizeof(char), 32, fd))
-			return (NULL);
-		if (!fread(iv, sizeof(char), 32, fd))
-			return (NULL);
-		fclose(fd);
-		goto init_cipher;
-	}
-	/* otherwise create a new key */
 	RAND_bytes(salt, 16);
 	RAND_bytes(key_data, 512);
 	if (EVP_BytesToKey(EVP_aes_256_cbc(), EVP_sha1(),
-						salt, key_data, 512, nrounds, key, iv) != 32)
+						salt, key_data, 512, rounds, key, iv) != 32)
 	{
 		fprintf(stderr, "Key size is not 256 bits\n");
 		return (NULL);
 	}
-	/* TODO: write to socket instead of file */
-	fw = fopen(key_path, "wb+");
-		fwrite(key, sizeof(char), 32, fw);
-		fwrite(iv, sizeof(char), 32, fw);
-	fclose(fw);
-init_cipher:
+	if (encrypt_key_iv(key, iv) < 0)
+	{
+		fprintf(stderr, "Key was not written to disk.\n");
+		return (NULL);
+	}
 	EVP_CIPHER_CTX_init(e_ctx);
 	EVP_EncryptInit_ex(e_ctx, EVP_aes_256_cbc(), NULL, key, iv);
 	return (e_ctx);
@@ -61,20 +45,9 @@ EVP_CIPHER_CTX *aes_decrypt_init(EVP_CIPHER_CTX *d_ctx)
 {
 	unsigned char key[32];
 	unsigned char iv[32];
-	char key_path[PATH_MAX];
-	FILE *fd;
 
-	if (!getcwd(key_path, PATH_MAX))
+	if (decrypt_key_iv(key, iv) < 0)
 		return (NULL);
-	my_strncat(key_path, "/data.key\0", my_strlen(key_path), 10);
-	/* TODO: read from socket instead of file */
-	fd = fopen(key_path, "r");
-	if (!fread(key, sizeof(char), 32, fd))
-		return (NULL);
-	fseek(fd, 32, SEEK_SET);
-	if (!fread(iv, sizeof(char), 32, fd))
-		return (NULL);
-	fclose(fd);
 	EVP_CIPHER_CTX_init(d_ctx);
 	EVP_DecryptInit_ex(d_ctx, EVP_aes_256_cbc(), NULL, key, iv);
 	return (d_ctx);

