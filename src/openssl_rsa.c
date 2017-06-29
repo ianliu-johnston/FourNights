@@ -11,9 +11,6 @@ static unsigned char *get_key(char cipher_flag)
 	FILE *fd;
 	struct stat file_info;
 
-	buf = malloc(BIGBUF * sizeof(char));
-	if (!buf)
-		return(NULL);
 	if(!getcwd(cwd_key, PATH_MAX))
 		return (NULL);
 	if (cipher_flag == 'e')
@@ -23,40 +20,72 @@ static unsigned char *get_key(char cipher_flag)
 	lstat(cwd_key, &file_info);
 	fd = fopen(cwd_key, "r");
 	if (!fd)
+	{
+		fprintf(stderr, "Could not open key file.\n");
 		return (NULL);
-	fread(buf, file_info.st_size, sizeof(char), fd);
+	}
+	buf = my_calloc((file_info.st_size + 1) * sizeof(char), sizeof(char));
+	if (!buf)
+		return(NULL);
+	fread(buf, file_info.st_size + 1, sizeof(char), fd);
 	fclose(fd);
    	return (buf);
 }
 
 /**
-  * createRSA - Create an RSA key
- (* http://hayageek.com/rsa-encryption-decryption-openssl-c/
+  * rsa_cipher - Create an RSA key
   * @key: RSA key
   * @cipher_flag: 'e' for encrypt 'd' for decrypt
   * Return: pointer to RSA object
   */
-static RSA *createRSA(char cipher_flag)
+static int rsa_cipher(unsigned char *plaintext,
+					int data_len,
+				   	unsigned char *ciphertext,
+					char cipher_flag)
 {
 	unsigned char *key;
+	int result;
     RSA *rsa = NULL;
-    BIO *keybio;
+    BIO *keybio = NULL;
 
+	if (!plaintext || !ciphertext)
+		return (-1);
 	key = get_key(cipher_flag);
+	if (!key)
+		return (-1);
     keybio = BIO_new_mem_buf(key, -1);
     if (keybio == NULL)
     {
         fprintf(stderr, "Failed to create key BIO\n");
-		return (NULL);
+		free(key);
+		return (-2);
     }
     if(cipher_flag == 'e')
-        rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa, NULL, NULL);
-    else if (cipher_flag == 'd')
+	{
+        PEM_read_bio_RSA_PUBKEY(keybio, &rsa, NULL, NULL);
+		if(rsa == NULL)
+		{
+			fprintf(stderr,"Failed to create RSA\n");
+			free(key);
+			return (-2);
+		}
+		result = RSA_public_encrypt(data_len, plaintext, ciphertext, rsa, RSA_PKCS1_PADDING);
+	}
+    if (cipher_flag == 'd')
+	{
         rsa = PEM_read_bio_RSAPrivateKey(keybio, &rsa, NULL, NULL);
-    if(rsa == NULL)
-        fprintf(stderr,"Failed to create RSA\n");
+		if(rsa == NULL)
+		{
+			fprintf(stderr,"Failed to create RSA\n");
+			free(key);
+			return (-2);
+		}
+		result = RSA_private_decrypt(data_len, ciphertext, plaintext, rsa, RSA_PKCS1_PADDING);
+	}
 	free(key);
-    return (rsa);
+	RSA_free(rsa);
+	BIO_free_all(keybio);
+    return (result);
 }
 
 /**
@@ -70,14 +99,7 @@ int rsa_public_encrypt(unsigned char *dec,
 					int data_len,
 				   	unsigned char *enc)
 {
-	RSA *rsa = NULL;
-	int result;
-
-	rsa = createRSA('e');
-	if (!rsa)
-		return (0);
-	result = RSA_public_encrypt(data_len, dec, enc, rsa, RSA_PKCS1_PADDING);
-	return(result);
+	return(rsa_cipher(dec, data_len, enc, 'e'));
 }
 
 /**
@@ -91,13 +113,5 @@ int rsa_private_decrypt(unsigned char *enc,
 					int data_len,
 					unsigned char *dec)
 {
-	RSA *rsa = NULL;
-	int result;
-
-	rsa = createRSA('d');
-	if (!rsa)
-		return (0);
-	result = RSA_private_decrypt(data_len, enc, dec, rsa, RSA_PKCS1_PADDING);
-	CRYPTO_cleanup_all_ex_data();
-	return (result);
+	return(rsa_cipher(dec, data_len, enc, 'd'));
 }

@@ -80,6 +80,7 @@ unsigned char *aes_decrypt(EVP_CIPHER_CTX *d,
 int check_padding(unsigned char *filepath, size_t size);
 
 int rsa_public_encrypt(unsigned char *dec, int data_len, unsigned char *enc);
+
 int rsa_private_decrypt(unsigned char *enc, int data_len, unsigned char *dec);
 
 /* DEBUGGING */

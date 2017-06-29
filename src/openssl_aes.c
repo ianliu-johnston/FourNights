@@ -15,23 +15,25 @@
 EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx)
 {
 	int i;
-	int nrounds = 24;
+	int rounds = 24;
 	unsigned char key[32], iv[32];
+	unsigned char key_iv[64];
 
-	unsigned char key_enc[1024];
-	/*
-	unsigned char key_dec[1024];
-	*/
+	unsigned char key_enc[2048];
+	unsigned char key_dec[2048];
 	int res = 0;
 	unsigned char key_data[512], salt[16];
 	char key_path[PATH_MAX];
+	/*
 	FILE *fd = NULL;
+	*/
 	FILE *fw = NULL;
 
 	/* if a key and IV is in the file system, use that to encrypt or decrypt. */
 	if (!getcwd(key_path, PATH_MAX))
 		return (NULL);
 	my_strncat(key_path, "/data.key\0", my_strlen(key_path), 10);
+	/*
 	fd = fopen(key_path, "r");
 	if (fd)
 	{
@@ -42,47 +44,56 @@ EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx)
 		fclose(fd);
 		goto init_cipher;
 	}
+	*/
 	/* otherwise create a new key */
 	RAND_bytes(salt, 16);
 	RAND_bytes(key_data, 512);
 	if (EVP_BytesToKey(EVP_aes_256_cbc(), EVP_sha1(),
-						salt, key_data, 512, nrounds, key, iv) != 32)
+						salt, key_data, 512, rounds, key, iv) != 32)
 	{
 		fprintf(stderr, "Key size is not 256 bits\n");
 		return (NULL);
 	}
-	/* TODO: write to socket instead of file */
+	/*
 	fw = fopen(key_path, "wb+");
 		fwrite(key, sizeof(char), 32, fw);
 		fwrite(iv, sizeof(char), 32, fw);
 	fclose(fw);
-init_cipher:
-	printf("DEBUG\n");
-	for (i = 0; i < 32; i++)
-		printf("%s%d", i ? ", " : "", key[i]);
-	putchar('\n');
-	putchar('\n');
-	putchar('\n');
-	putchar('\n');
-
-	res = rsa_public_encrypt(key, 32, key_enc);
-
-	printf("%d\n", res);
-	for (i = 0; i < res; i++)
-		printf("%s%d", i ? ", " : "", key_enc[i]);
-
-	putchar('\n');
-	putchar('\n');
-	putchar('\n');
-	/*
-	res = rsa_private_decrypt(key_enc, res, key_dec);
-	printf("%d\n", res);
-	for (i = 0; i < res; i++)
-		printf("%s%d", i ? ", " : "", key_dec[i]);
-	putchar('\n');
-	putchar('\n');
-	putchar('\n');
 	*/
+
+	/* TODO: write to socket instead of file */
+	/*
+init_cipher:
+*/
+	for (i = 0; i < 64; i++)
+	{
+		if (i < 32)
+			key_iv[i] = key[i];
+		if (i >= 32)
+			key_iv[i] = iv[i - 32];
+	}
+	res = rsa_public_encrypt(key_iv, 64, key_enc);
+	if (res < 0)
+		return (NULL);
+
+	fw = fopen(key_path, "wb+");
+		fwrite(key_enc, sizeof(char), res, fw);
+	fclose(fw);
+
+	if (rsa_private_decrypt(key_enc, res, key_dec) < 0)
+		return (NULL);
+
+	printf("Plaintext\n");
+	for (i = 0; i < 64; i++)
+		printf("%s%x", i ? ", " : "", key_iv[i]);
+
+	printf("\nDecrypted\n");
+	for (i = 0; i < 64; i++)
+		printf("%s%x", i ? ", " : "", key_dec[i]);
+	printf("\nEncrypted\n");
+	for (i = 0; i < res; i++)
+		printf("%s%x", i ? ", " : "", key_enc[i]);
+	putchar('\n');
 
 	EVP_CIPHER_CTX_init(e_ctx);
 	EVP_EncryptInit_ex(e_ctx, EVP_aes_256_cbc(), NULL, key, iv);
@@ -97,24 +108,56 @@ init_cipher:
  **/
 EVP_CIPHER_CTX *aes_decrypt_init(EVP_CIPHER_CTX *d_ctx)
 {
+	int res, i;
 	unsigned char key[32];
 	unsigned char iv[32];
+	unsigned char *key_iv_enc;
+	unsigned char *key_iv_dec;
 	char key_path[PATH_MAX];
 	FILE *fd;
+	struct stat file_info;
 
 	if (!getcwd(key_path, PATH_MAX))
 		return (NULL);
 	my_strncat(key_path, "/data.key\0", my_strlen(key_path), 10);
 	/* TODO: read from socket instead of file */
-	fd = fopen(key_path, "r");
-	if (!fread(key, sizeof(char), 32, fd))
+	if (lstat(key_path, &file_info) == -1)
 		return (NULL);
-	fseek(fd, 32, SEEK_SET);
-	if (!fread(iv, sizeof(char), 32, fd))
+	key_iv_enc = malloc((int)file_info.st_size * sizeof(char));
+	key_iv_dec = my_calloc(512 * sizeof(char), sizeof(char));
+	if (!key_iv_enc || !key_iv_dec)
+		return (NULL);
+	fd = fopen(key_path, "r");
+	if (!fread(key_iv_enc, sizeof(char), file_info.st_size, fd))
 		return (NULL);
 	fclose(fd);
+	printf("Encoded\n");
+	for (i = 0; i < (int)file_info.st_size; i++)
+		printf("%02x ", key_iv_enc[i]);
+	putchar('\n');
+	res = rsa_private_decrypt(key_iv_enc, (int)file_info.st_size, key_iv_dec);
+	if (res < 0)
+		return (NULL);
+	printf("Decoded\n");
+	for (i = 0; i < 32; i++)
+	{
+		key[i] = key_iv_dec[i];
+		printf("%02x ", key[i]);
+	}
+	for (i = 32; i < 64; i++)
+	{
+		iv[i - 32] = key_iv_dec[i];
+		printf("%02x ", iv[i - 32]);
+	}
+
 	EVP_CIPHER_CTX_init(d_ctx);
 	EVP_DecryptInit_ex(d_ctx, EVP_aes_256_cbc(), NULL, key, iv);
+	/*
+	free(key_iv_enc);
+	key_iv_enc = NULL;
+	free(key_iv_dec);
+	key_iv_dec = NULL;
+	*/
 	return (d_ctx);
 }
 
