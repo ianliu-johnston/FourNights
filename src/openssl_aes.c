@@ -1,4 +1,9 @@
 #include "fournights.h"
+#ifndef AES_H
+#define AES_H
+  #include <openssl/aes.h>
+  #include <openssl/rand.h>
+#endif
 /**
   * aes_encrypt_init - Create a 256 bit key and IV using the supplied key_data
  (* if one doesn't already exist, otherwise uses the supplied key + IV
@@ -7,11 +12,17 @@
   * @e_ctx: decryption structure
   * Return: 0 on success, -1 on failure
  **/
-
 EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx)
 {
+	int i;
 	int nrounds = 24;
 	unsigned char key[32], iv[32];
+
+	unsigned char key_enc[1024];
+	/*
+	unsigned char key_dec[1024];
+	*/
+	int res = 0;
 	unsigned char key_data[512], salt[16];
 	char key_path[PATH_MAX];
 	FILE *fd = NULL;
@@ -46,6 +57,33 @@ EVP_CIPHER_CTX *aes_encrypt_init(EVP_CIPHER_CTX *e_ctx)
 		fwrite(iv, sizeof(char), 32, fw);
 	fclose(fw);
 init_cipher:
+	printf("DEBUG\n");
+	for (i = 0; i < 32; i++)
+		printf("%s%d", i ? ", " : "", key[i]);
+	putchar('\n');
+	putchar('\n');
+	putchar('\n');
+	putchar('\n');
+
+	res = rsa_public_encrypt(key, 32, key_enc);
+
+	printf("%d\n", res);
+	for (i = 0; i < res; i++)
+		printf("%s%d", i ? ", " : "", key_enc[i]);
+
+	putchar('\n');
+	putchar('\n');
+	putchar('\n');
+	/*
+	res = rsa_private_decrypt(key_enc, res, key_dec);
+	printf("%d\n", res);
+	for (i = 0; i < res; i++)
+		printf("%s%d", i ? ", " : "", key_dec[i]);
+	putchar('\n');
+	putchar('\n');
+	putchar('\n');
+	*/
+
 	EVP_CIPHER_CTX_init(e_ctx);
 	EVP_EncryptInit_ex(e_ctx, EVP_aes_256_cbc(), NULL, key, iv);
 	return (e_ctx);

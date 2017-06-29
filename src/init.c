@@ -33,7 +33,6 @@ file_filter_t *init_struct(file_filter_t *file_filter, char *target_dir)
 	}
 	tmp_bufs->file_offset = 0;
 	tmp_bufs->bytes_read = 0;
-	file_filter->root_path = target_dir;
 	file_filter->uid = geteuid();
 	if (!(getcwd(filepath, PATH_MAX - 1)) ||
 		!(my_strncat(filepath, "/file_exts.txt\0", my_strlen(filepath), 15)))
@@ -68,7 +67,6 @@ void free_file_filter_struct(file_filter_t *file_filter)
 	free(file_filter->tmp_bufs);
 	file_filter->tmp_bufs = NULL;
 
-	file_filter->root_path = NULL;
 	free(file_filter->file_exts_whole_str);
 	file_filter->file_exts_whole_str = NULL;
 	free(file_filter->file_extensions);
